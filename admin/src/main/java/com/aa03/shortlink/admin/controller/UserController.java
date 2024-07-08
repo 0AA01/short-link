@@ -3,7 +3,7 @@ package com.aa03.shortlink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
-import com.aa03.shortlink.admin.dto.req.UpdateUserReqDto;
+import com.aa03.shortlink.admin.dto.req.UserUpdateReqDto;
 import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserActualRespDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
@@ -58,9 +58,12 @@ public class UserController {
         return Results.success();
     }
 
+    /**
+     * 修改用户
+     */
     @PutMapping("/api/short-link/v1/user")
-    public Result<Void> updateUser(@RequestBody UpdateUserReqDto updateUserReqDto) {
-        userService.updateUser(updateUserReqDto);
+    public Result<Void> updateUser(@RequestBody UserUpdateReqDto userUpdateReqDto) {
+        userService.updateUser(userUpdateReqDto);
         return Results.success();
     }
 

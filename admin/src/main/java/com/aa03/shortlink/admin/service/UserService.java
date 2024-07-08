@@ -1,7 +1,7 @@
 package com.aa03.shortlink.admin.service;
 
 import com.aa03.shortlink.admin.dao.entity.UserDo;
-import com.aa03.shortlink.admin.dto.req.UpdateUserReqDto;
+import com.aa03.shortlink.admin.dto.req.UserUpdateReqDto;
 import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -34,5 +34,5 @@ public interface UserService extends IService<UserDo> {
      */
     void registerUser(UserRegisterReqDto requestParam);
 
-    void updateUser(UpdateUserReqDto updateUserReqDto);
+    void updateUser(UserUpdateReqDto userUpdateReqDto);
 }

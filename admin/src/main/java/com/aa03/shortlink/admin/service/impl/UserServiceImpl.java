@@ -6,7 +6,7 @@ import com.aa03.shortlink.admin.common.convention.exception.ClientException;
 import com.aa03.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.aa03.shortlink.admin.dao.entity.UserDo;
 import com.aa03.shortlink.admin.dao.mapper.UserMapper;
-import com.aa03.shortlink.admin.dto.req.UpdateUserReqDto;
+import com.aa03.shortlink.admin.dto.req.UserUpdateReqDto;
 import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
 import com.aa03.shortlink.admin.service.UserService;
@@ -78,10 +78,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
     }
 
     @Override
-    public void updateUser(UpdateUserReqDto updateUserReqDto) {
+    public void updateUser(UserUpdateReqDto userUpdateReqDto) {
         LambdaUpdateWrapper<UserDo> eq = Wrappers.lambdaUpdate(UserDo.class)
-                .eq(UserDo::getUsername, updateUserReqDto);
-        UserDo userDo = BeanUtil.toBean(updateUserReqDto, UserDo.class);
+                .eq(UserDo::getUsername, userUpdateReqDto);
+        UserDo userDo = BeanUtil.toBean(userUpdateReqDto, UserDo.class);
         baseMapper.update(userDo, eq);
     }
 }
