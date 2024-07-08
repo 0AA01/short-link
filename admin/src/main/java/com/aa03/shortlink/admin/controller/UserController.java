@@ -3,16 +3,12 @@ package com.aa03.shortlink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
-import com.aa03.shortlink.admin.common.enums.UserErrorCodeEnum;
+import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserActualRespDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
 import com.aa03.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 用户管理控制层
@@ -41,4 +37,24 @@ public class UserController {
         UserActualRespDto userByUsername = BeanUtil.toBean(userService.getUserByUsername(username), UserActualRespDto.class);
         return Results.success(userByUsername);
     }
+
+    /**
+     * 查询用户名是否存在
+     */
+    @GetMapping("/user/has-username")
+    public Result<Boolean> hasUsername(@RequestParam("username") String username) {
+        return Results.success(userService.hasUsername(username));
+    }
+
+    /**
+     * 注册用户
+     *
+     * @param requestParam 注册用户请求参数
+     */
+    @PostMapping("/user")
+    public Result<Void> registerUser(@RequestBody UserRegisterReqDto requestParam) {
+        userService.registerUser(requestParam);
+        return Results.success();
+    }
+
 }
