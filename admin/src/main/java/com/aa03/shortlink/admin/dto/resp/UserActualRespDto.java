@@ -2,6 +2,9 @@ package com.aa03.shortlink.admin.dto.resp;
 
 import lombok.Data;
 
+/**
+ * 用户无脱敏参数响应
+ */
 @Data
 public class UserActualRespDto {
     /**
