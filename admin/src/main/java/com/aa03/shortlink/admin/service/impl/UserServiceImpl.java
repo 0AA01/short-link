@@ -6,10 +6,12 @@ import com.aa03.shortlink.admin.common.convention.exception.ClientException;
 import com.aa03.shortlink.admin.common.enums.UserErrorCodeEnum;
 import com.aa03.shortlink.admin.dao.entity.UserDo;
 import com.aa03.shortlink.admin.dao.mapper.UserMapper;
+import com.aa03.shortlink.admin.dto.req.UpdateUserReqDto;
 import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
 import com.aa03.shortlink.admin.service.UserService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -73,5 +75,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public void updateUser(UpdateUserReqDto updateUserReqDto) {
+        LambdaUpdateWrapper<UserDo> eq = Wrappers.lambdaUpdate(UserDo.class)
+                .eq(UserDo::getUsername, updateUserReqDto);
+        UserDo userDo = BeanUtil.toBean(updateUserReqDto, UserDo.class);
+        baseMapper.update(userDo, eq);
     }
 }
