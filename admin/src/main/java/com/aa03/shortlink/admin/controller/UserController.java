@@ -3,9 +3,11 @@ package com.aa03.shortlink.admin.controller;
 import cn.hutool.core.bean.BeanUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
-import com.aa03.shortlink.admin.dto.req.UserUpdateReqDto;
+import com.aa03.shortlink.admin.dto.req.UserLoginReqDto;
 import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
+import com.aa03.shortlink.admin.dto.req.UserUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserActualRespDto;
+import com.aa03.shortlink.admin.dto.resp.UserLoginRespDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
 import com.aa03.shortlink.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +28,8 @@ public class UserController {
      */
     @GetMapping("/user/{username}")
     public Result<UserRespDto> getUserByUsername(@PathVariable("username") String username) {
-        UserRespDto userByUsername = userService.getUserByUsername(username);
-        return Results.success(userByUsername);
+        UserRespDto result = userService.getUserByUsername(username);
+        return Results.success(result);
     }
 
     /**
@@ -35,8 +37,8 @@ public class UserController {
      */
     @GetMapping("/actual/user/{username}")
     public Result<UserActualRespDto> getUserActualByUsername(@PathVariable("username") String username) {
-        UserActualRespDto userByUsername = BeanUtil.toBean(userService.getUserByUsername(username), UserActualRespDto.class);
-        return Results.success(userByUsername);
+        UserActualRespDto result = BeanUtil.toBean(userService.getUserByUsername(username), UserActualRespDto.class);
+        return Results.success(result);
     }
 
     /**
@@ -61,12 +63,41 @@ public class UserController {
     /**
      * 修改用户
      */
-    @PutMapping("/api/short-link/v1/user")
-    public Result<Void> updateUser(@RequestBody UserUpdateReqDto userUpdateReqDto) {
-        userService.updateUser(userUpdateReqDto);
+    @PutMapping("/user")
+    public Result<Void> updateUser(@RequestBody UserUpdateReqDto requestParam) {
+        userService.updateUser(requestParam);
         return Results.success();
     }
 
+    /**
+     * 用户登录
+     */
+    @PostMapping("/user/login")
+    public Result<UserLoginRespDto> userLogin(@RequestBody UserLoginReqDto requestParam) {
+        UserLoginRespDto result = userService.userLogin(requestParam);
+        return Results.success(result);
+    }
 
+    /**
+     * 检查用户是否登录
+     *
+     * @param username 用户名
+     * @param token 用户登录身份验证信息
+     */
+    @GetMapping("/user/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
+        return Results.success(userService.checkLogin(username, token));
+    }
 
+    /**
+     * 用户退出登录
+     *
+     * @param username 用户名
+     * @param token 用户登录身份验证信息
+     */
+    @DeleteMapping("/user/logout")
+    public Result<Void> logout(@RequestParam("username") String username, @RequestParam("token") String token) {
+        userService.logout(username, token);
+        return Results.success();
+    }
 }
