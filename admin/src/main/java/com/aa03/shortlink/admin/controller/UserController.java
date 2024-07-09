@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * 用户管理控制层
  */
 @RestController
-@RequestMapping("/api/short-link/v1/")
+@RequestMapping("/api/short-link/admin/v1/")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -51,8 +51,6 @@ public class UserController {
 
     /**
      * 注册用户
-     *
-     * @param requestParam 注册用户请求参数
      */
     @PostMapping("/user")
     public Result<Void> registerUser(@RequestBody UserRegisterReqDto requestParam) {
@@ -80,9 +78,6 @@ public class UserController {
 
     /**
      * 检查用户是否登录
-     *
-     * @param username 用户名
-     * @param token 用户登录身份验证信息
      */
     @GetMapping("/user/check-login")
     public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
@@ -91,9 +86,6 @@ public class UserController {
 
     /**
      * 用户退出登录
-     *
-     * @param username 用户名
-     * @param token 用户登录身份验证信息
      */
     @DeleteMapping("/user/logout")
     public Result<Void> logout(@RequestParam("username") String username, @RequestParam("token") String token) {
