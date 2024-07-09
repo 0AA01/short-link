@@ -115,7 +115,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
         Map<String, String> userInfoMap = new HashMap<>();
         userInfoMap.put(uuid, JSON.toJSONString(userDo));
         stringRedisTemplate.opsForHash().putAll(key, userInfoMap);
-        stringRedisTemplate.expire(key, 30, TimeUnit.MINUTES);
+        stringRedisTemplate.expire(key, 30, TimeUnit.DAYS);
         return new UserLoginRespDto(uuid);
     }
 
