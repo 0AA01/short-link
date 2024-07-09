@@ -4,10 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import com.aa03.shortlink.admin.common.biz.user.UserContext;
 import com.aa03.shortlink.admin.dao.entity.GroupDo;
 import com.aa03.shortlink.admin.dao.mapper.GroupMapper;
+import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
 import com.aa03.shortlink.admin.service.GroupService;
 import com.aa03.shortlink.admin.toolkit.RandomGenerator;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,17 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDo> implemen
                 .orderByDesc(GroupDo::getSortOrder, GroupDo::getUpdateTime);
         List<GroupDo> groupDoList = baseMapper.selectList(queryWrapper);
         return BeanUtil.copyToList(groupDoList, ShortLinkGroupRespDto.class);
+    }
+
+    @Override
+    public void updateGroup(ShortLinkGroupUpdateReqDto requestParam) {
+        LambdaUpdateWrapper<GroupDo> queryWrapper = Wrappers.lambdaUpdate(GroupDo.class)
+                .eq(GroupDo::getUsername, UserContext.getUsername())
+                .eq(GroupDo::getGid, requestParam.getGid())
+                .eq(GroupDo::getDelFlag, 0);
+        GroupDo groupDo = new GroupDo();
+        groupDo.setName(requestParam.getName());
+        baseMapper.update(groupDo, queryWrapper);
     }
 
     private boolean hasGid(String gid) {

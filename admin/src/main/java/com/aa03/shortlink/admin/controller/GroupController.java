@@ -3,6 +3,7 @@ package com.aa03.shortlink.admin.controller;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSavaReqDto;
+import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
 import com.aa03.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,8 @@ public class GroupController {
 
     /**
      * 新增短链接分组
-     *
-     * @param requestParam 新增短链接分组请求参数
      */
-    @PostMapping("/api/short-link/v1/group")
+    @PostMapping("/api/short-link/admin/v1/group")
     public Result<Void> save(@RequestBody ShortLinkGroupSavaReqDto requestParam) {
         groupService.saveGroup(requestParam.getName());
         return Results.success();
@@ -35,12 +34,19 @@ public class GroupController {
 
     /**
      * 查询用户短链接分组集合
-     *
-     * @return 用户短链接分组集合
      */
-    @GetMapping("/api/short-link/group")
+    @GetMapping("/api/short-link/admin/v1/group")
     public Result<List<ShortLinkGroupRespDto>> listGroup() {
         List<ShortLinkGroupRespDto> result = groupService.listGroup();
         return Results.success(result);
+    }
+
+    /**
+     * 修改短链接分组名称
+     */
+    @PostMapping("/api/short-link/v1/group")
+    public Result<Void> updateGroup(@RequestBody ShortLinkGroupUpdateReqDto requestParam) {
+        groupService.updateGroup(requestParam);
+        return Results.success();
     }
 }
