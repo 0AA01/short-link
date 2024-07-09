@@ -38,4 +38,9 @@ public class GroupDo extends BaseDo implements Serializable {
      * 创建用户
      */
     private String username;
+
+    /**
+     * 分组排序
+     */
+    private Integer sortOrder;
 }
