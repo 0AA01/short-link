@@ -9,6 +9,11 @@ import lombok.Data;
 public class ShortLinkGroupRespDto {
 
     /**
+     * 分组标识
+     */
+    private String gid;
+
+    /**
      * 分组名称
      */
     private String name;
