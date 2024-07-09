@@ -40,7 +40,7 @@ public class UserTransmitFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String requestURL = httpServletRequest.getRequestURI();
-        if (!IGNORE_URI.contains(requestURL )) {
+        if (!IGNORE_URI.contains(requestURL)) {
             String method = httpServletRequest.getMethod();
             if (!(Objects.equals(requestURL, "/api/short-link/admin/v1/user") && Objects.equals(method, "POST"))) {
                 String username = httpServletRequest.getHeader(USER_NAME_KEY);
@@ -81,7 +81,6 @@ public class UserTransmitFilter implements Filter {
             writer = response.getWriter();
             writer.print(json);
         } catch (IOException e) {
-            e.printStackTrace();
         } finally {
             if (writer != null)
                 writer.close();
