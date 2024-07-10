@@ -3,6 +3,7 @@ package com.aa03.shortlink.admin.controller;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSavaReqDto;
+import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSortReqDto;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
 import com.aa03.shortlink.admin.service.GroupService;
@@ -55,4 +56,14 @@ public class GroupController {
         groupService.deleteGroup(gid);
         return Results.success();
     }
+
+    /**
+     * 短链接分组排序
+     */
+    @PostMapping("/api/short-link/v1/group/sort")
+    public Result<Void> sortGroup(@RequestBody List<ShortLinkGroupSortReqDto> requestParam) {
+        groupService.sortGroup(requestParam);
+        return Results.success();
+    }
+
 }

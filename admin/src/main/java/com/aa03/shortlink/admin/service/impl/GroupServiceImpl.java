@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import com.aa03.shortlink.admin.common.biz.user.UserContext;
 import com.aa03.shortlink.admin.dao.entity.GroupDo;
 import com.aa03.shortlink.admin.dao.mapper.GroupMapper;
+import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSortReqDto;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
 import com.aa03.shortlink.admin.service.GroupService;
@@ -70,6 +71,19 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDo> implemen
         GroupDo groupDo = new GroupDo();
         groupDo.setDelFlag(1);
         baseMapper.update(groupDo, queryWrapper);
+    }
+
+    @Override
+    public void sortGroup(List<ShortLinkGroupSortReqDto> requestParam) {
+        requestParam.forEach(item -> {
+            GroupDo groupDo = GroupDo.builder()
+                    .sortOrder(item.getSortOrder()).build();
+            LambdaUpdateWrapper<GroupDo> queryWrapper = Wrappers.lambdaUpdate(GroupDo.class)
+                    .eq(GroupDo::getUsername, UserContext.getUsername())
+                    .eq(GroupDo::getGid, item.getGid())
+                    .eq(GroupDo::getDelFlag, 0);
+            baseMapper.update(groupDo,queryWrapper);
+        });
     }
 
     private boolean hasGid(String gid) {
