@@ -6,6 +6,7 @@ import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSavaReqDto;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSortReqDto;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
+import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.admin.service.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -65,5 +66,4 @@ public class GroupController {
         groupService.sortGroup(requestParam);
         return Results.success();
     }
-
 }

@@ -1,16 +1,17 @@
 package com.aa03.shortlink.admin.controller;
 
 import com.aa03.shortlink.admin.common.convention.result.Result;
+import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.remote.dto.ShortLinkRemoteService;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkPageRespDto;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * 短链接后管控制层
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class ShortLinkController {
 
     ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
-
     };
 
     /**
