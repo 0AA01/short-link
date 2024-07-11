@@ -9,7 +9,10 @@ import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -47,4 +50,13 @@ public interface ShortLinkService extends IService<ShortLinkDo> {
      * @param requestParam 修改短链接请求参数
      */
     void updateShortLink(ShortLinkUpdateReqDto requestParam);
+
+    /**
+     * 短链接跳转
+     *
+     * @param shortUri  短链接后缀
+     * @param request  HTTP请求
+     * @param response HTTP响应
+     */
+    void restoreUrl(String shortUri, ServletRequest request, ServletResponse response);
 }
