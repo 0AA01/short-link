@@ -3,6 +3,7 @@ package com.aa03.shortlink.project.service;
 import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
@@ -39,4 +40,11 @@ public interface ShortLinkService extends IService<ShortLinkDo> {
      * @return 查询短链接分组内数量响应
      */
     List<ShortLinkCountQueryRespDto> listGroupShortLinkCount(List<String> requestParam);
+
+    /**
+     * 短链接信息修改
+     *
+     * @param requestParam 修改短链接请求参数
+     */
+    void updateShortLink(ShortLinkUpdateReqDto requestParam);
 }
