@@ -18,6 +18,7 @@ import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
 import com.aa03.shortlink.project.service.ShortLinkService;
 import com.aa03.shortlink.project.toolkit.HashUtil;
+import com.aa03.shortlink.project.toolkit.LinkUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -42,9 +43,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
-import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
-import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY;
+import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.*;
 import static com.aa03.shortlink.project.common.enums.ShortLinkErrorCodeEnum.*;
 
 /**
@@ -74,6 +75,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             log.warn("短链接：{} 重复入库", fullShortUrl);
             throw new ServiceException(SHORT_LINK_GENERATE_REPEAT);
         }
+        stringRedisTemplate.opsForValue().set(
+                fullShortUrl,
+                requestParam.getOriginUrl(),
+                LinkUtil.getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS
+        );
         shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
         return ShortLinkCreateRespDto.builder().fullShortUrl("http://" + shortLinkDo.getFullShortUrl()).originUrl(shortLinkDo.getOriginUrl()).gid(requestParam.getGid()).build();
     }
@@ -123,32 +129,53 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         String serverName = request.getServerName();
         String fullShortUrl = serverName + "/" + shortUri;
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-        if (StrUtil.isBlank(originalLink)) {
-            String lockFullShortUrl = String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl);
-            RLock lock = redissonClient.getLock(lockFullShortUrl);
-            lock.lock();
-            try {
-                originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-                if (StrUtil.isNotBlank(originalLink)) {
-                    ((HttpServletResponse) response).sendRedirect(originalLink);
-                    return;
-                }
 
-                LambdaQueryWrapper<ShortLinkGotoDo> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDo.class)
-                        .eq(ShortLinkGotoDo::getFullShortUrl, fullShortUrl);
-                ShortLinkGotoDo linkGotoDo = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
-                if (linkGotoDo == null) {
-                    return;
-                }
-                LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class).eq(ShortLinkDo::getGid, linkGotoDo.getGid()).eq(ShortLinkDo::getFullShortUrl, fullShortUrl).eq(ShortLinkDo::getDelFlag, 0).eq(ShortLinkDo::getEnableStatus, 0);
-                ShortLinkDo shortLinkDo = baseMapper.selectOne(queryWrapper);
-                if (shortLinkDo != null) {
-                    stringRedisTemplate.opsForValue().set(lockFullShortUrl, shortLinkDo.getOriginUrl());
-                    ((HttpServletResponse) response).sendRedirect(shortLinkDo.getOriginUrl());
-                }
-            } finally {
-                lock.unlock();
+        if (StrUtil.isNotBlank(originalLink)) {
+            ((HttpServletResponse) response).sendRedirect(originalLink);
+            return;
+        }
+
+        boolean contains = shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl);
+        if (!contains) {
+            return;
+        }
+
+        String gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
+        if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
+            return;
+        }
+
+
+        String lockFullShortUrl = String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl);
+        RLock lock = redissonClient.getLock(lockFullShortUrl);
+
+        try {
+            lock.lock();
+            originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+            if (StrUtil.isNotBlank(originalLink)) {
+                ((HttpServletResponse) response).sendRedirect(originalLink);
+                return;
             }
+            gotoIsNullShortLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
+            if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
+                return;
+            }
+
+            LambdaQueryWrapper<ShortLinkGotoDo> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDo.class)
+                    .eq(ShortLinkGotoDo::getFullShortUrl, fullShortUrl);
+            ShortLinkGotoDo linkGotoDo = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
+            if (linkGotoDo == null) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                return;
+            }
+            LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class).eq(ShortLinkDo::getGid, linkGotoDo.getGid()).eq(ShortLinkDo::getFullShortUrl, fullShortUrl).eq(ShortLinkDo::getDelFlag, 0).eq(ShortLinkDo::getEnableStatus, 0);
+            ShortLinkDo shortLinkDo = baseMapper.selectOne(queryWrapper);
+            if (shortLinkDo != null) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), shortLinkDo.getOriginUrl());
+                ((HttpServletResponse) response).sendRedirect(shortLinkDo.getOriginUrl());
+            }
+        } finally {
+            lock.unlock();
         }
     }
 
