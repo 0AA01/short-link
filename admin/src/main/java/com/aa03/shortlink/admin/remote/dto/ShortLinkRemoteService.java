@@ -2,8 +2,10 @@ package com.aa03.shortlink.admin.remote.dto;
 
 import cn.hutool.http.HttpUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
+import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkPageRespDto;
@@ -62,5 +64,16 @@ public interface ShortLinkRemoteService {
         String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/count", requestMap);
         return JSON.parseObject(resultPageStr, new TypeReference<>() {
         });
+    }
+
+
+    /**
+     * 短链接信息修改
+     *
+     * @param requestParam 修改短链接请求参数
+     */
+    default Result<Void> updateShortLink(ShortLinkUpdateReqDto requestParam) {
+        String resultBodyStr = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update", JSON.toJSONString(requestParam));
+        return Results.success();
     }
 }

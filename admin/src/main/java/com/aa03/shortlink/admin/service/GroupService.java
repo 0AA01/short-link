@@ -4,6 +4,7 @@ import com.aa03.shortlink.admin.dao.entity.GroupDo;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSortReqDto;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
+import com.aa03.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDto;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

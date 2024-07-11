@@ -5,6 +5,7 @@ import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.remote.dto.ShortLinkRemoteService;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkPageRespDto;
@@ -24,9 +25,6 @@ public class ShortLinkController {
 
     /**
      * 创建短链接
-     *
-     * @param requestParam 创建短链接请求参数
-     * @return 短链接创建信息
      */
     @PostMapping("/api/short-link/admin/v1/create")
     public Result<ShortLinkCreateRespDto> createShortLink(@RequestBody ShortLinkCreateReqDto requestParam) {
@@ -35,12 +33,18 @@ public class ShortLinkController {
 
     /**
      * 短链接分页查询
-     *
-     * @param requestParam 短链接分页查询请求参数
-     * @return 短链接分页返回结果
      */
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<IPage<ShortLinkPageRespDto>> pageShortLink(ShortLinkPageReqDto requestParam) {
         return shortLinkRemoteService.pageShortLink(requestParam);
     }
+
+    /**
+     * 短链接信息修改
+     */
+    @PostMapping("/api/short-link/admin/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDto requestParam) {
+        return shortLinkRemoteService.updateShortLink(requestParam);
+    }
+
 }
