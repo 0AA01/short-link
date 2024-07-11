@@ -56,6 +56,11 @@ public class ShortLinkDo extends BaseDo {
     private String originUrl;
 
     /**
+     * 网站图标
+     */
+    private String favicon;
+
+    /**
      * 点击量
      */
     private Integer clickNum;
