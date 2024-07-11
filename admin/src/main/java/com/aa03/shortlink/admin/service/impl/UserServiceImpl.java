@@ -11,6 +11,7 @@ import com.aa03.shortlink.admin.dto.req.UserRegisterReqDto;
 import com.aa03.shortlink.admin.dto.req.UserUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.UserLoginRespDto;
 import com.aa03.shortlink.admin.dto.resp.UserRespDto;
+import com.aa03.shortlink.admin.service.GroupService;
 import com.aa03.shortlink.admin.service.UserService;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -44,6 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
+    private final GroupService groupService;
 
     @Override
     public UserRespDto getUserByUsername(String username) {
@@ -80,6 +82,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
                     throw new ClientException(BaseErrorCode.CLIENT_ERROR);
                 }
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
+                groupService.saveGroup("默认分组");
                 return;
             }
             throw new ClientException(USER_NAME_EXIST);
