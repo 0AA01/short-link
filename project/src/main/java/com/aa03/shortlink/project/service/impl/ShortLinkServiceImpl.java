@@ -39,10 +39,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.*;
@@ -76,11 +73,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             throw new ServiceException(SHORT_LINK_GENERATE_REPEAT);
         }
         stringRedisTemplate.opsForValue().set(
-                fullShortUrl,
+                String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
                 requestParam.getOriginUrl(),
                 LinkUtil.getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS
         );
-        shortUriCreateCachePenetrationBloomFilter.add(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+        shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
         return ShortLinkCreateRespDto.builder().fullShortUrl("http://" + shortLinkDo.getFullShortUrl()).originUrl(shortLinkDo.getOriginUrl()).gid(requestParam.getGid()).build();
     }
 
@@ -145,7 +142,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             return;
         }
 
-
         String lockFullShortUrl = String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl);
         RLock lock = redissonClient.getLock(lockFullShortUrl);
 
@@ -160,7 +156,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             if (StrUtil.isNotBlank(gotoIsNullShortLink)) {
                 return;
             }
-
             LambdaQueryWrapper<ShortLinkGotoDo> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDo.class)
                     .eq(ShortLinkGotoDo::getFullShortUrl, fullShortUrl);
             ShortLinkGotoDo linkGotoDo = shortLinkGotoMapper.selectOne(linkGotoQueryWrapper);
@@ -168,12 +163,25 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 return;
             }
-            LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class).eq(ShortLinkDo::getGid, linkGotoDo.getGid()).eq(ShortLinkDo::getFullShortUrl, fullShortUrl).eq(ShortLinkDo::getDelFlag, 0).eq(ShortLinkDo::getEnableStatus, 0);
+            LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class)
+                    .eq(ShortLinkDo::getGid, linkGotoDo.getGid()).eq(ShortLinkDo::getFullShortUrl, fullShortUrl)
+                    .eq(ShortLinkDo::getDelFlag, 0)
+                    .eq(ShortLinkDo::getEnableStatus, 0);
             ShortLinkDo shortLinkDo = baseMapper.selectOne(queryWrapper);
-            if (shortLinkDo != null) {
-                stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), shortLinkDo.getOriginUrl());
-                ((HttpServletResponse) response).sendRedirect(shortLinkDo.getOriginUrl());
+            if (shortLinkDo == null) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                return;
             }
+            if (shortLinkDo.getValidDate() != null && shortLinkDo.getValidDate().before(new Date())) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                return;
+            }
+            stringRedisTemplate.opsForValue().set(
+                    String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
+                    shortLinkDo.getOriginUrl(),
+                    LinkUtil.getLinkCacheValidDate(shortLinkDo.getValidDate()), TimeUnit.MILLISECONDS
+            );
+            ((HttpServletResponse) response).sendRedirect(shortLinkDo.getOriginUrl());
         } finally {
             lock.unlock();
         }
