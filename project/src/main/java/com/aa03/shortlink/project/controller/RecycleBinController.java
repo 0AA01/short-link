@@ -3,8 +3,12 @@ package com.aa03.shortlink.project.controller;
 import com.aa03.shortlink.project.common.convention.result.Result;
 import com.aa03.shortlink.project.common.convention.result.Results;
 import com.aa03.shortlink.project.dto.req.RecycleBinSaveReqDto;
+import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
 import com.aa03.shortlink.project.service.RecycleBinService;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,5 +30,14 @@ public class RecycleBinController {
         recycleBinService.saveRecycleBin(requestParam);
         return Results.success();
     }
+
+    /**
+     * 回收站分页查询
+     */
+    @GetMapping("/api/short-link/v1/recycle-bin/page")
+    public Result<IPage<ShortLinkPageRespDto>> pageShortLink(ShortLinkPageReqDto requestParam) {
+        return Results.success(recycleBinService.pageShortLink(requestParam));
+    }
+
 
 }
