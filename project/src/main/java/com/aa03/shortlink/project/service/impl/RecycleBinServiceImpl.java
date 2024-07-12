@@ -3,6 +3,7 @@ package com.aa03.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
 import com.aa03.shortlink.project.dao.mapper.ShortLinkMapper;
+import com.aa03.shortlink.project.dto.req.RecycleBinRecoverReqDto;
 import com.aa03.shortlink.project.dto.req.RecycleBinSaveReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDto;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
 
+import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
 import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
 
 /**
@@ -61,5 +63,27 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
             result.setDomain("http://" + result.getDomain());
             return result;
         });
+    }
+
+    @Override
+    public void recoverRecycleBin(RecycleBinRecoverReqDto requestParam) {
+        LambdaUpdateWrapper<ShortLinkDo> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDo.class)
+                .eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDo::getGid, requestParam.getGid())
+                .eq(ShortLinkDo::getEnableStatus, 1)
+                .eq(ShortLinkDo::getDelFlag, 0);
+        ShortLinkDo shortLinkDo = ShortLinkDo.builder()
+                .enableStatus(0)
+                .build();
+
+        baseMapper.update(shortLinkDo, updateWrapper);
+        if (shortLinkDo != null) {
+            stringRedisTemplate.opsForValue().set(
+                    String.format(GOTO_SHORT_LINK_KEY, shortLinkDo.getFullShortUrl()),
+                    shortLinkDo.getOriginUrl(),
+                    LinkUtil.getLinkCacheValidDate(shortLinkDo.getValidDate()), TimeUnit.MILLISECONDS
+            );
+            stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, shortLinkDo.getFullShortUrl()));
+        }
     }
 }

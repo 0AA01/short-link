@@ -2,6 +2,7 @@ package com.aa03.shortlink.project.controller;
 
 import com.aa03.shortlink.project.common.convention.result.Result;
 import com.aa03.shortlink.project.common.convention.result.Results;
+import com.aa03.shortlink.project.dto.req.RecycleBinRecoverReqDto;
 import com.aa03.shortlink.project.dto.req.RecycleBinSaveReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
@@ -39,5 +40,12 @@ public class RecycleBinController {
         return Results.success(recycleBinService.pageShortLink(requestParam));
     }
 
-
+    /**
+     * 回收站恢复功能
+     */
+    @PostMapping("/api/short-link/v1/recycle-bin/recover")
+    public Result<Void> recoverRecycleBin(@RequestBody RecycleBinRecoverReqDto requestParam) {
+        recycleBinService.recoverRecycleBin(requestParam);
+        return Results.success();
+    }
 }
