@@ -12,7 +12,10 @@ public enum UserErrorCodeEnum implements IErrorCode {
     USER_NOT_EXIST("B00204", "用户登录信息错误"),
     USER_AUTHENTICATION_EXPIRED("B00205", "用户登录信息过期"),
     USER_HAS_LOGIN("B00206", "用户已登录"),
-    USER_NOT_LOGIN("B00207", "用户未登录");
+    USER_NOT_LOGIN("B00207", "用户未登录"),
+
+
+    USER_GROUP_NULL("B10100", "用户无分组信息");
 
     private final String code;
 

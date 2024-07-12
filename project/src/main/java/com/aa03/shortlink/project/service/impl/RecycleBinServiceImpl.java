@@ -5,6 +5,7 @@ import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
 import com.aa03.shortlink.project.dao.mapper.ShortLinkMapper;
 import com.aa03.shortlink.project.dto.req.RecycleBinSaveReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
 import com.aa03.shortlink.project.service.RecycleBinService;
 import com.aa03.shortlink.project.toolkit.LinkUtil;
@@ -48,12 +49,12 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
     }
 
     @Override
-    public IPage<ShortLinkPageRespDto> pageShortLink(ShortLinkPageReqDto requestParam) {
+    public IPage<ShortLinkPageRespDto> pageShortLink(ShortLinkRecycleBinPageReqDto requestParam) {
         LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class)
-                .eq(ShortLinkDo::getGid, requestParam.getGid())
+                .in(ShortLinkDo::getGid, requestParam.getGidList())
                 .eq(ShortLinkDo::getEnableStatus, 1)
                 .eq(ShortLinkDo::getDelFlag, 0)
-                .orderByDesc(ShortLinkDo::getCreateTime);
+                .orderByDesc(ShortLinkDo::getUpdateTime);
         IPage<ShortLinkDo> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
         return resultPage.convert(each -> {
             ShortLinkPageRespDto result = BeanUtil.toBean(each, ShortLinkPageRespDto.class);
