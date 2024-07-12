@@ -3,6 +3,7 @@ package com.aa03.shortlink.admin.remote.dto;
 import cn.hutool.http.HttpUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
+import com.aa03.shortlink.admin.remote.dto.req.RecycleBinSaveReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDto;
@@ -101,6 +102,18 @@ public interface ShortLinkRemoteService {
         requestMap.put("url", url);
         String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/favicon", requestMap);
         return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
+    }
+
+
+    /**
+     * 回收站新增功能
+     *
+     * @param requestParam 回收站新增请求参数
+     */
+    default Result<Void> saveRecycleBin(RecycleBinSaveReqDto requestParam) {
+        String resultBodyStr = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/save", JSON.toJSONString(requestParam));
+        return JSON.parseObject(resultBodyStr, new TypeReference<>() {
         });
     }
 }
