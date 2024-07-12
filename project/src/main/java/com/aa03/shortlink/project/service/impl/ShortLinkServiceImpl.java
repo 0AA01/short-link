@@ -31,6 +31,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -39,6 +42,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -57,14 +62,30 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkGotoMapper shortLinkGotoMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ShortLinkCreateRespDto createShortLink(ShortLinkCreateReqDto requestParam) {
         String shortLinkSuffix = generateSuffix(requestParam);
-        String fullShortUrl = StrBuilder.create(requestParam.getDomain()).append("/").append(shortLinkSuffix).toString();
-        ShortLinkDo shortLinkDo = ShortLinkDo.builder().domain(requestParam.getDomain()).originUrl(requestParam.getOriginUrl()).gid(requestParam.getGid()).createType(requestParam.getCreatedType()).validDate(requestParam.getValidDate()).validDateType(requestParam.getValidDateType()).describe(requestParam.getDescribe()).shortUri(shortLinkSuffix).enableStatus(0).fullShortUrl(fullShortUrl).build();
-        ShortLinkGotoDo linkGotoDo = ShortLinkGotoDo.builder().fullShortUrl(fullShortUrl).gid(requestParam.getGid()).build();
+        String fullShortUrl = StrBuilder.create(requestParam.getDomain())
+                .append("/")
+                .append(shortLinkSuffix)
+                .toString();
+        ShortLinkDo shortLinkDo = ShortLinkDo.builder()
+                .domain(requestParam.getDomain())
+                .originUrl(requestParam.getOriginUrl())
+                .gid(requestParam.getGid())
+                .createType(requestParam.getCreatedType())
+                .validDate(requestParam.getValidDate())
+                .validDateType(requestParam.getValidDateType())
+                .describe(requestParam.getDescribe())
+                .shortUri(shortLinkSuffix).enableStatus(0)
+                .fullShortUrl(fullShortUrl)
+                .favicon(getFaviconByUrl(requestParam.getOriginUrl()))
+                .build();
+        ShortLinkGotoDo linkGotoDo = ShortLinkGotoDo.builder()
+                .fullShortUrl(fullShortUrl)
+                .gid(requestParam.getGid())
+                .build();
         try {
             baseMapper.insert(shortLinkDo);
             shortLinkGotoMapper.insert(linkGotoDo);
@@ -78,7 +99,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 LinkUtil.getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS
         );
         shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
-        return ShortLinkCreateRespDto.builder().fullShortUrl("http://" + shortLinkDo.getFullShortUrl()).originUrl(shortLinkDo.getOriginUrl()).gid(requestParam.getGid()).build();
+        return ShortLinkCreateRespDto.builder()
+                .fullShortUrl("http://" + shortLinkDo.getFullShortUrl())
+                .originUrl(shortLinkDo.getOriginUrl())
+                .gid(requestParam.getGid())
+                .build();
     }
 
     @Override
@@ -190,6 +215,33 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         }
     }
 
+
+
+    private String getFaviconByUrl(String url) {
+        try {
+            // 连接到网站并解析HTML
+            Document doc = Jsoup.connect(url).get();
+
+            // 尝试从<link>标签中获取favicon
+            Element faviconElement = doc.select("link[rel~=(?i)^(shortcut|icon|shortcut icon)$]").first();
+
+            if (faviconElement != null) {
+                String faviconUrl = faviconElement.attr("href");
+
+                // 检查favicon URL是否是相对路径
+                if (!faviconUrl.startsWith("http")) {
+                    URL targetUrl = new URL(url);
+                    String baseUrl = targetUrl.getProtocol() + "://" + targetUrl.getHost();
+                    faviconUrl = baseUrl + faviconUrl;
+                }
+                return faviconUrl;
+            }
+            // 如果没有找到favicon，返回null或默认值
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+    }
     private String generateSuffix(ShortLinkCreateReqDto requestParam) {
         int customGenerateCount = 0;
         String originUrl = requestParam.getOriginUrl();

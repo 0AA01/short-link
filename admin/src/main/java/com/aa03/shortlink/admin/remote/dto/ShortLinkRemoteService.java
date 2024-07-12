@@ -13,7 +13,6 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.commons.collections4.map.HashedMap;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -75,5 +74,33 @@ public interface ShortLinkRemoteService {
     default Result<Void> updateShortLink(ShortLinkUpdateReqDto requestParam) {
         String resultBodyStr = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update", JSON.toJSONString(requestParam));
         return Results.success();
+    }
+
+    /**
+     * 根据URL获取网站标题
+     *
+     * @param url 目标网站地址
+     * @return 网站标题
+     */
+    default Result<String> getTitleByUrl(String url) {
+        Map<String, Object> requestMap = new HashedMap<>();
+        requestMap.put("url", url);
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title", requestMap);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
+    }
+
+    /**
+     * 根据URL获取网站的图标
+     *
+     * @param url 目标网站地址
+     * @return 网站的图标地址
+     */
+    default Result<String> getFaviconByUrl(String url) {
+        Map<String, Object> requestMap = new HashedMap<>();
+        requestMap.put("url", url);
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/favicon", requestMap);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
     }
 }
