@@ -51,4 +51,13 @@ public class RecycleBinController {
         return Results.success();
     }
 
+    /**
+     * 回收站删除功能
+     */
+    @PostMapping("/api/short-link/admin/v1/recycle-bin/remove")
+    public Result<Void> removeRecycleBin(@RequestBody RecycleBinRecoverReqDto requestParam) {
+        shortLinkRemoteService.removeRecycleBin(requestParam);
+        return Results.success();
+    }
+
 }
