@@ -16,5 +16,5 @@ public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDo> {
     @Insert("INSERT INTO t_link_access_stats (full_short_url,gid,date,pv,uv,uip,hour,weekday,create_time,update_time,del_flag)" +
             "VALUES(#{linkAccessStatsDo.fullShortUrl}, #{linkAccessStatsDo.gid}, #{linkAccessStatsDo.date}, #{linkAccessStatsDo.pv}, #{linkAccessStatsDo.uv}, #{linkAccessStatsDo.uip}, #{linkAccessStatsDo.hour}, #{linkAccessStatsDo.weekday}, NOW(), NOW(), 0) ON DUPLICATE KEY " +
             "UPDATE  pv = pv + #{linkAccessStatsDo.pv},  uv = uv + #{linkAccessStatsDo.uv},  uip = uip + #{linkAccessStatsDo.uip};")
-    void shortLinkStats(@Param("linkAccessStatsDo") LinkAccessStatsDo linkAccessStatsDoDo);
+    void shortLinkStats(@Param("linkAccessStatsDo") LinkAccessStatsDo linkAccessStatsDo);
 }
