@@ -54,4 +54,29 @@ public class LinkUtil {
         }
         return ip;
     }
+
+    /**
+     * 获取用户操作系统
+     *
+     * @param request 用户请求
+     * @return 用户操作系统
+     */
+    public static String getOperatingSystem(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        String os = "Unknown OS";
+
+        if (userAgent.toLowerCase().contains("windows")) {
+            os = "Windows";
+        } else if (userAgent.toLowerCase().contains("mac")) {
+            os = "MacOS";
+        } else if (userAgent.toLowerCase().contains("x11")) {
+            os = "Unix";
+        } else if (userAgent.toLowerCase().contains("android")) {
+            os = "Android";
+        } else if (userAgent.toLowerCase().contains("iphone")) {
+            os = "iOS";
+        }
+
+        return os;
+    }
 }
