@@ -1,10 +1,9 @@
 package com.aa03.shortlink.project.service.impl;
 
-import cn.hutool.Hutool;
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -56,6 +55,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.*;
 import static com.aa03.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
@@ -77,6 +77,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
     private final LinkOsStatsMapper linkOsStatsMapper;
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
+    private final LinkAccessLogsMapper linkAccessLogsMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
@@ -241,14 +242,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         AtomicBoolean uvFirstFlag = new AtomicBoolean(true);
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
         try {
+            AtomicReference<String> uv = new AtomicReference();
             Runnable addResponseCookieTask = () -> {
-                String uv = cn.hutool.core.lang.UUID.fastUUID().toString();
-                Cookie uvCookie = new Cookie("uv", uv);
+                uv.set(UUID.fastUUID().toString());
+                Cookie uvCookie = new Cookie("uv", uv.get());
                 uvCookie.setMaxAge(60 * 60 * 24 * 30);
                 uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.indexOf("/"), fullShortUrl.length()));
                 ((HttpServletResponse) response).addCookie(uvCookie);
                 uvFirstFlag.set(Boolean.TRUE);
-                stringRedisTemplate.opsForSet().add(SHORT_LINK_UV_EXIST + fullShortUrl, uv);
+                stringRedisTemplate.opsForSet().add(SHORT_LINK_UV_EXIST + fullShortUrl, uv.get());
             };
 
             if (ArrayUtil.isNotEmpty(cookies)) {
@@ -257,6 +259,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .findFirst()
                         .map(Cookie::getValue)
                         .ifPresentOrElse(each -> {
+                            uv.set(each);
                             Long uvAdded = stringRedisTemplate.opsForSet().add(SHORT_LINK_UV_EXIST + fullShortUrl, each);
                             uvFirstFlag.set(uvAdded != null && uvAdded > 0L);
                         }, addResponseCookieTask);
@@ -301,7 +304,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
             LinkLocaleStatsDo linkLocaleStatsDo;
 
-            if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode,"10000")) {
+            if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode, "10000")) {
                 String province = localeResultObj.getString("province");
                 boolean unknownFlag = StrUtil.isBlank(province);
                 linkLocaleStatsDo = LinkLocaleStatsDo.builder()
@@ -315,22 +318,34 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .date(now)
                         .build();
                 linkLocaleStatsMapper.shortLinkLocaleState(linkLocaleStatsDo);
+                String os = LinkUtil.getOperatingSystem((HttpServletRequest) request);
                 LinkOsStatsDo linkOsStatsDo = LinkOsStatsDo.builder()
-                        .os(LinkUtil.getOperatingSystem((HttpServletRequest) request))
+                        .os(os)
                         .cnt(1)
                         .gid(gid)
                         .fullShortUrl(fullShortUrl)
                         .date(now)
                         .build();
                 linkOsStatsMapper.shortLinkOsState(linkOsStatsDo);
+                String browser = LinkUtil.getBrowser(((HttpServletRequest) request));
                 LinkBrowserStatsDo linkBrowserStatsDO = LinkBrowserStatsDo.builder()
-                        .browser(LinkUtil.getBrowser(((HttpServletRequest) request)))
+                        .browser(browser)
                         .cnt(1)
                         .gid(gid)
                         .fullShortUrl(fullShortUrl)
                         .date(new Date())
                         .build();
                 linkBrowserStatsMapper.shortLinkBrowserState(linkBrowserStatsDO);
+
+                LinkAccessLogsDo linkAccessLogsDo = LinkAccessLogsDo.builder()
+                        .ip(remoteAddr)
+                        .os(os)
+                        .browser(browser)
+                        .gid(gid)
+                        .user(uv.get())
+                        .fullShortUrl(fullShortUrl)
+                        .build();
+                linkAccessLogsMapper.insert(linkAccessLogsDo);
             }
         } catch (Throwable ex) {
             log.error("短链接访问量统计异常", ex);
