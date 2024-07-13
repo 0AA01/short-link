@@ -64,7 +64,6 @@ public class LinkUtil {
     public static String getOperatingSystem(HttpServletRequest request) {
         String userAgent = request.getHeader("User-Agent");
         String os = "Unknown OS";
-
         if (userAgent.toLowerCase().contains("windows")) {
             os = "Windows";
         } else if (userAgent.toLowerCase().contains("mac")) {
@@ -76,7 +75,35 @@ public class LinkUtil {
         } else if (userAgent.toLowerCase().contains("iphone")) {
             os = "iOS";
         }
-
         return os;
+    }
+
+    /**
+     * 获取用户浏览器
+     *
+     * @param request 用户请求
+     * @return 用户浏览器
+     */
+    public static String getBrowser(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        String browser = "Unknown Browser";
+
+        if (userAgent.contains("MSIE") || userAgent.contains("Trident")) {
+            browser = "Internet Explorer";
+        } else if (userAgent.contains("Edge")) {
+            browser = "Edge";
+        } else if (userAgent.contains("Firefox")) {
+            browser = "Firefox";
+        } else if (userAgent.contains("Chrome")) {
+            // Chrome user agent string includes "Safari", so it should be checked first
+            browser = "Chrome";
+        } else if (userAgent.contains("Safari")) {
+            // Check for Safari after Chrome because Chrome's user agent includes "Safari"
+            browser = "Safari";
+        } else if (userAgent.contains("Opera") || userAgent.contains("OPR")) {
+            browser = "Opera";
+        }
+
+        return browser;
     }
 }
