@@ -34,4 +34,11 @@ public interface RecycleBinService extends IService<ShortLinkDo> {
      * @param requestParam 回收站恢复请求参数
      */
     void recoverRecycleBin(RecycleBinRecoverReqDto requestParam);
+
+    /**
+     * 回收站删除
+     *
+     * @param requestParam 回收站删除请求参数
+     */
+    void removeRecycleBin(RecycleBinRecoverReqDto requestParam);
 }

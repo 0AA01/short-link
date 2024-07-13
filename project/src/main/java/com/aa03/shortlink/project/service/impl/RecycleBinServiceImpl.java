@@ -86,4 +86,16 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
             stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, shortLinkDo.getFullShortUrl()));
         }
     }
+
+    @Override
+    public void removeRecycleBin(RecycleBinRecoverReqDto requestParam) {
+        LambdaUpdateWrapper<ShortLinkDo> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDo.class)
+                .eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDo::getGid, requestParam.getGid())
+                .eq(ShortLinkDo::getEnableStatus, 1)
+                .eq(ShortLinkDo::getDelFlag, 0);
+
+        stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+        baseMapper.delete(updateWrapper);
+    }
 }
