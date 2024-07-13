@@ -1,5 +1,6 @@
 package com.aa03.shortlink.project.dao.entity;
 
+import com.aa03.shortlink.project.common.database.BaseDo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -18,7 +19,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("t_link_access_stats")
-public class LinkAccessStatsDo {
+public class LinkAccessStatsDo extends BaseDo {
 
     @TableId(type = IdType.AUTO)
     /**
