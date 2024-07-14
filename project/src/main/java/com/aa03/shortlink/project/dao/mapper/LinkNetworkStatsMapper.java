@@ -53,5 +53,6 @@ public interface LinkNetworkStatsMapper extends BaseMapper<LinkNetworkStatsDo> {
             "GROUP BY " +
             "    gid, network;")
     List<LinkNetworkStatsDo> listNetworkStatsByGroup(@Param("param") ShortLinkGroupStatsReqDto requestParam);
+
 }
 

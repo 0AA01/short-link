@@ -1,5 +1,6 @@
 package com.aa03.shortlink.project.service;
 
+import com.aa03.shortlink.project.dto.req.ShortLinkGroupStatsReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkStatsReqDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkStatsAccessRecordRespDto;
@@ -25,13 +26,13 @@ public interface ShortLinkStatsService {
     IPage<ShortLinkStatsAccessRecordRespDto> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam);
 
 //
-//    /**
-//     * 获取分组短链接监控数据
-//     *
-//     * @param requestParam 获取分组短链接监控数据入参
-//     * @return 分组短链接监控数据
-//     */
-//    ShortLinkStatsRespDto groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam);
+    /**
+     * 获取分组短链接监控数据
+     *
+     * @param requestParam 获取分组短链接监控数据入参
+     * @return 分组短链接监控数据
+     */
+    ShortLinkStatsRespDto groupShortLinkStats(ShortLinkGroupStatsReqDto requestParam);
 //
 //
 //    /**

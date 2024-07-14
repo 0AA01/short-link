@@ -1,6 +1,7 @@
 package com.aa03.shortlink.project.dao.mapper;
 
 import com.aa03.shortlink.project.dao.entity.LinkLocaleStatsDo;
+import com.aa03.shortlink.project.dto.req.ShortLinkGroupStatsReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkStatsReqDto;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
@@ -38,4 +39,20 @@ public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDo> {
             "GROUP BY " +
             "    full_short_url, gid, province;")
     List<LinkLocaleStatsDo> listLocaleByShortLink(@Param("param") ShortLinkStatsReqDto requestParam);
+
+    /**
+     * 根据分组获取指定日期内地区监控数据
+     */
+    @Select("SELECT " +
+            "    province, " +
+            "    SUM(cnt) AS cnt " +
+            "FROM " +
+            "    t_link_locale_stats " +
+            "WHERE " +
+            "    gid = #{param.gid} " +
+            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    gid, province;")
+    List<LinkLocaleStatsDo> listLocaleByGroup(@Param("param") ShortLinkGroupStatsReqDto requestParam);
+
 }

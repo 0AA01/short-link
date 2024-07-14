@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.http.HttpUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
+import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
 import com.aa03.shortlink.admin.remote.dto.req.*;
 import com.aa03.shortlink.admin.remote.dto.resp.*;
 import com.alibaba.fastjson2.JSON;
@@ -163,6 +164,18 @@ public interface ShortLinkRemoteService {
      */
     default Result<ShortLinkStatsRespDto> oneShortLinkStats(ShortLinkStatsReqDto requestParam) {
         String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats", BeanUtil.beanToMap(requestParam));
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
+    }
+
+    /**
+     * 获取分组短链接监控数据
+     *
+     * @param requestParam 获取短链接监控数据入参
+     * @return 短链接监控数据
+     */
+    default Result<ShortLinkStatsRespDto> groupShortLinkStats(ShortLinkGroupStatsReqDto requestParam) {
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/group", BeanUtil.beanToMap(requestParam));
         return JSON.parseObject(resultPageStr, new TypeReference<>() {
         });
     }

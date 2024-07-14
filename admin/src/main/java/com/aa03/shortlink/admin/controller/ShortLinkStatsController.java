@@ -3,6 +3,7 @@ package com.aa03.shortlink.admin.controller;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.remote.dto.ShortLinkRemoteService;
+import com.aa03.shortlink.admin.remote.dto.req.ShortLinkGroupStatsReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDto;
 import com.aa03.shortlink.admin.remote.dto.req.ShortLinkStatsReqDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDto;
@@ -28,6 +29,14 @@ public class ShortLinkStatsController {
     @GetMapping("/api/short-link/admin/v1/stats")
     public Result<ShortLinkStatsRespDto> shortLinkStats(ShortLinkStatsReqDto requestParam) {
         return shortLinkRemoteService.oneShortLinkStats(requestParam);
+    }
+
+    /**
+     * 访问分组短链接指定时间内监控数据
+     */
+    @GetMapping("/api/short-link/admin/v1/stats/group")
+    public Result<ShortLinkStatsRespDto> groupShortLinkStats(ShortLinkGroupStatsReqDto requestParam) {
+        return shortLinkRemoteService.groupShortLinkStats(requestParam);
     }
 
     /**
