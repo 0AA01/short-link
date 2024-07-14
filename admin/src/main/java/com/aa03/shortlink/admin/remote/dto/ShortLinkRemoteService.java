@@ -7,6 +7,7 @@ import com.aa03.shortlink.admin.remote.dto.req.*;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkPageRespDto;
+import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDto;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -154,4 +155,22 @@ public interface ShortLinkRemoteService {
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {
         });
     }
+
+    /**
+     * 获取单个短链接监控数据
+     *
+     * @param requestParam 获取短链接监控数据入参
+     * @return 短链接监控数据
+     */
+    default Result<ShortLinkStatsRespDto> oneShortLinkStats(ShortLinkStatsReqDto requestParam) {
+        Map<String, Object> requestMap = new HashedMap<>();
+        requestMap.put("fullShortUrl", requestParam.getFullShortUrl());
+        requestMap.put("gid", requestParam.getGid());
+        requestMap.put("startDate", requestParam.getStartDate());
+        requestMap.put("endDate", requestParam.getEndDate());
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats", requestMap);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
+    }
+
 }
