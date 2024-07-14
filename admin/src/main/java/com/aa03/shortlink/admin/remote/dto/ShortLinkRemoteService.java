@@ -1,13 +1,11 @@
 package com.aa03.shortlink.admin.remote.dto;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.http.HttpUtil;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.convention.result.Results;
 import com.aa03.shortlink.admin.remote.dto.req.*;
-import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCountQueryRespDto;
-import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDto;
-import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkPageRespDto;
-import com.aa03.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDto;
+import com.aa03.shortlink.admin.remote.dto.resp.*;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -163,14 +161,23 @@ public interface ShortLinkRemoteService {
      * @return 短链接监控数据
      */
     default Result<ShortLinkStatsRespDto> oneShortLinkStats(ShortLinkStatsReqDto requestParam) {
-        Map<String, Object> requestMap = new HashedMap<>();
-        requestMap.put("fullShortUrl", requestParam.getFullShortUrl());
-        requestMap.put("gid", requestParam.getGid());
-        requestMap.put("startDate", requestParam.getStartDate());
-        requestMap.put("endDate", requestParam.getEndDate());
-        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats", requestMap);
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats", BeanUtil.beanToMap(requestParam));
         return JSON.parseObject(resultPageStr, new TypeReference<>() {
         });
     }
 
+    /**
+     * 访问单个短链接指定时间内访问记录监控数据
+     *
+     * @param requestParam 获取短链接监控访问记录数据入参
+     * @return 访问记录监控数据
+     */
+   default Result<IPage<ShortLinkStatsAccessRecordRespDto>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam) {
+       Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
+       stringObjectMap.remove("orders");
+       stringObjectMap.remove("records");
+       String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record", stringObjectMap);
+       return JSON.parseObject(resultPageStr, new TypeReference<>() {
+       });
+   }
 }

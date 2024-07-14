@@ -1,35 +1,22 @@
 package com.aa03.shortlink.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
 import com.aa03.shortlink.project.dao.entity.*;
+import com.aa03.shortlink.project.dao.mapper.*;
+import com.aa03.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkStatsReqDto;
-import com.aa03.shortlink.project.dao.mapper.LinkAccessLogsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkAccessStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkBrowserStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkDeviceStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkLocaleStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkNetworkStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkOsStatsMapper;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsAccessDailyRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsBrowserRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsDeviceRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsLocaleCNRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsNetworkRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsOsRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsTopIpRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkStatsUvRespDto;
+import com.aa03.shortlink.project.dto.resp.*;
 import com.aa03.shortlink.project.service.ShortLinkStatsService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -239,7 +226,8 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
                 .networkStats(networkStats)
                 .build();
     }
-//
+
+    //
 //    @Override
 //    public ShortLinkStatsRespDto groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
 //        List<LinkAccessStatsDo> listStatsByGroup = linkAccessStatsMapper.listStatsByGroup(requestParam);
@@ -403,37 +391,37 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 //                .build();
 //    }
 //
-//    @Override
-//    public IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
-//        LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
-//                .eq(LinkAccessLogsDo::getGid, requestParam.getGid())
-//                .eq(LinkAccessLogsDo::getFullShortUrl, requestParam.getFullShortUrl())
-//                .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
-//                .eq(LinkAccessLogsDo::getDelFlag, 0)
-//                .orderByDesc(LinkAccessLogsDo::getCreateTime);
-//        IPage<LinkAccessLogsDo> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
-//        IPage<ShortLinkStatsAccessRecordRespDTO> actualResult = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDTO.class));
-//        List<String> userAccessLogsList = actualResult.getRecords().stream()
-//                .map(ShortLinkStatsAccessRecordRespDTO::getUser)
-//                .toList();
-//        List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectUvTypeByUsers(
-//                requestParam.getGid(),
-//                requestParam.getFullShortUrl(),
-//                requestParam.getStartDate(),
-//                requestParam.getEndDate(),
-//                userAccessLogsList
-//        );
-//        actualResult.getRecords().forEach(each -> {
-//            String uvType = uvTypeList.stream()
-//                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
-//                    .findFirst()
-//                    .map(item -> item.get("uvType"))
-//                    .map(Object::toString)
-//                    .orElse("旧访客");
-//            each.setUvType(uvType);
-//        });
-//        return actualResult;
-//    }
+    @Override
+    public IPage<ShortLinkStatsAccessRecordRespDto> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam) {
+        LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
+                .eq(LinkAccessLogsDo::getGid, requestParam.getGid())
+                .eq(LinkAccessLogsDo::getFullShortUrl, requestParam.getFullShortUrl())
+                .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
+                .eq(LinkAccessLogsDo::getDelFlag, 0)
+                .orderByDesc(LinkAccessLogsDo::getCreateTime);
+        IPage<LinkAccessLogsDo> linkAccessLogsDoIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
+        IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDoIPage.convert(
+                each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class)
+        );
+        List<String> userAccessLogsList = actualResult.getRecords().stream().map(ShortLinkStatsAccessRecordRespDto::getUser).toList();
+        List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectUvTypeByUsers(
+                requestParam.getGid(),
+                requestParam.getFullShortUrl(),
+                requestParam.getStartDate(),
+                requestParam.getEndDate(),
+                userAccessLogsList
+        );
+        actualResult.getRecords().forEach(each -> {
+            String uvType = uvTypeList.stream()
+                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
+                    .findFirst()
+                    .map(item -> item.get("uvType"))
+                    .map(Objects::toString)
+                    .orElse("旧访客");
+            each.setUvType(uvType);
+        });
+        return actualResult;
+    }
 //
 //    @Override
 //    public IPage<ShortLinkStatsAccessRecordRespDTO> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {

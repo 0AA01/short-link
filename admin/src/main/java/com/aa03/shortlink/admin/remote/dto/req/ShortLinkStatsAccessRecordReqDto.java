@@ -1,6 +1,5 @@
-package com.aa03.shortlink.project.dto.req;
+package com.aa03.shortlink.admin.remote.dto.req;
 
-import com.aa03.shortlink.project.dao.entity.LinkAccessLogsDo;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.Data;
 
@@ -8,7 +7,7 @@ import lombok.Data;
  * 短链接监控访问记录请求参数
  */
 @Data
-public class ShortLinkStatsAccessRecordReqDto extends Page<LinkAccessLogsDo> {
+public class ShortLinkStatsAccessRecordReqDto extends Page {
 
     /**
      * 完整短链接
