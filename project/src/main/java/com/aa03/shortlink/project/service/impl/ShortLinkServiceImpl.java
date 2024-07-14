@@ -19,6 +19,7 @@ import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
+import com.aa03.shortlink.project.service.LinkStatsTodayService;
 import com.aa03.shortlink.project.service.ShortLinkService;
 import com.aa03.shortlink.project.toolkit.HashUtil;
 import com.aa03.shortlink.project.toolkit.LinkUtil;
@@ -80,6 +81,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkAccessLogsMapper linkAccessLogsMapper;
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
+    private final LinkStatsTodayMapper linkStatsTodayMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
@@ -378,6 +380,16 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 linkAccessLogsMapper.insert(linkAccessLogsDo);
 
                 baseMapper.incrementState(gid, fullShortUrl, 1, uvFirstFlag.get() ? 1 : 0, uipFirstFlag ? 1 : 0);
+
+                LinkStatsTodayDo linkStatsTodayDo = LinkStatsTodayDo.builder()
+                        .gid(gid)
+                        .fullShortUrl(fullShortUrl)
+                        .todayPv(1)
+                        .todayUv(uvFirstFlag.get() ? 1 : 0)
+                        .todayUip(uipFirstFlag ? 1 : 0)
+                        .date(now)
+                        .build();
+                linkStatsTodayMapper.shortLinkTodayState(linkStatsTodayDo);
             }
         } catch (Throwable ex) {
             log.error("短链接访问量统计异常", ex);
