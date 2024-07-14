@@ -18,10 +18,14 @@ short-link:
       amap-key: a446be873b6e7dc45541a898075dab51
 
 
+
 mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: delFlag
       logic-delete-value: 1
       logic-not-delete-value: 0
       id-type: auto
+  mapper-locations: classpath:mapper/*.xml
