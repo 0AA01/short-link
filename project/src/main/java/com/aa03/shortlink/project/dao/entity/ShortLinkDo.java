@@ -106,4 +106,22 @@ public class ShortLinkDo extends BaseDo {
      * 历史UIP
      */
     private Integer totalUip;
+
+    /**
+     * 当日PV
+     */
+    @TableField(exist = false)
+    private Integer todayPv;
+
+    /**
+     * 当日UV
+     */
+    @TableField(exist = false)
+    private Integer todayUv;
+
+    /**
+     * 当日UIP
+     */
+    @TableField(exist = false)
+    private Integer todayUip;
 }
