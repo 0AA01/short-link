@@ -425,33 +425,33 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
         return actualResult;
     }
 
-//    @Override
-//    public IPage<ShortLinkStatsAccessRecordRespDto> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDto requestParam) {
-//        LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
-//                .eq(LinkAccessLogsDo::getGid, requestParam.getGid())
-//                .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
-//                .eq(LinkAccessLogsDo::getDelFlag, 0)
-//                .orderByDesc(LinkAccessLogsDo::getCreateTime);
-//        IPage<LinkAccessLogsDo> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
-//        IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class));
-//        List<String> userAccessLogsList = actualResult.getRecords().stream()
-//                .map(ShortLinkStatsAccessRecordRespDto::getUser)
-//                .toList();
-//        List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectGroupUvTypeByUsers(
-//                requestParam.getGid(),
-//                requestParam.getStartDate(),
-//                requestParam.getEndDate(),
-//                userAccessLogsList
-//        );
-//        actualResult.getRecords().forEach(each -> {
-//            String uvType = uvTypeList.stream()
-//                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
-//                    .findFirst()
-//                    .map(item -> item.get("uvType"))
-//                    .map(Object::toString)
-//                    .orElse("旧访客");
-//            each.setUvType(uvType);
-//        });
-//        return actualResult;
-//    }
+    @Override
+    public IPage<ShortLinkStatsAccessRecordRespDto> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDto requestParam) {
+        LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
+                .eq(LinkAccessLogsDo::getGid, requestParam.getGid())
+                .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
+                .eq(LinkAccessLogsDo::getDelFlag, 0)
+                .orderByDesc(LinkAccessLogsDo::getCreateTime);
+        IPage<LinkAccessLogsDo> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
+        IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class));
+        List<String> userAccessLogsList = actualResult.getRecords().stream()
+                .map(ShortLinkStatsAccessRecordRespDto::getUser)
+                .toList();
+        List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectGroupUvTypeByUsers(
+                requestParam.getGid(),
+                requestParam.getStartDate(),
+                requestParam.getEndDate(),
+                userAccessLogsList
+        );
+        actualResult.getRecords().forEach(each -> {
+            String uvType = uvTypeList.stream()
+                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
+                    .findFirst()
+                    .map(item -> item.get("uvType"))
+                    .map(Object::toString)
+                    .orElse("旧访客");
+            each.setUvType(uvType);
+        });
+        return actualResult;
+    }
 }
