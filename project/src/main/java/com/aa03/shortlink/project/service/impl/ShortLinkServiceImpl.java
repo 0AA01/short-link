@@ -18,7 +18,6 @@ import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
 import com.aa03.shortlink.project.dto.resp.*;
-import com.aa03.shortlink.project.service.LinkStatsTodayService;
 import com.aa03.shortlink.project.service.ShortLinkService;
 import com.aa03.shortlink.project.toolkit.HashUtil;
 import com.aa03.shortlink.project.toolkit.LinkUtil;
@@ -184,7 +183,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateShortLink(ShortLinkUpdateReqDto requestParam) {
-        LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class).eq(ShortLinkDo::getGid, requestParam.getGid()).eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl()).eq(ShortLinkDo::getDelFlag, 0).eq(ShortLinkDo::getEnableStatus, 0);
+        LambdaQueryWrapper<ShortLinkDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkDo.class)
+                .eq(ShortLinkDo::getGid, requestParam.getGid())
+                .eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDo::getDelFlag, 0)
+                .eq(ShortLinkDo::getEnableStatus, 0);
         ShortLinkDo hasShortLinkDo = baseMapper.selectOne(queryWrapper);
         if (hasShortLinkDo == null) {
             throw new ClientException(SHORT_LINK_NOT_EXIST);
@@ -192,13 +195,32 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         // TODO 缺少创建时间
         ShortLinkDo shortLinkDo = ShortLinkDo.builder().domain(hasShortLinkDo.getDomain()).shortUri(hasShortLinkDo.getShortUri()).clickNum(hasShortLinkDo.getClickNum()).favicon(hasShortLinkDo.getFavicon()).createType(hasShortLinkDo.getCreateType()).gid(hasShortLinkDo.getGid()).originUrl(requestParam.getOriginUrl()).describe(requestParam.getDescribe()).validDateType(requestParam.getValidDateType()).validDate(requestParam.getValidDate()).build();
         if (Objects.equals(requestParam.getGid(), hasShortLinkDo.getGid())) {
-            LambdaUpdateWrapper<ShortLinkDo> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDo.class).eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl()).eq(ShortLinkDo::getGid, requestParam.getGid()).eq(ShortLinkDo::getDelFlag, 0).eq(ShortLinkDo::getEnableStatus, 0).set(Objects.equals(requestParam.getValidDateType(), ValidDateTypeEnum.PERMANENT), ShortLinkDo::getValidDate, null);
+            LambdaUpdateWrapper<ShortLinkDo> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDo.class)
+                    .eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl())
+                    .eq(ShortLinkDo::getGid, requestParam.getGid())
+                    .eq(ShortLinkDo::getDelFlag, 0)
+                    .eq(ShortLinkDo::getEnableStatus, 0)
+                    .set(Objects.equals(requestParam.getValidDateType(), ValidDateTypeEnum.PERMANENT), ShortLinkDo::getValidDate, null);
             baseMapper.update(shortLinkDo, updateWrapper);
         } else {
-            LambdaUpdateWrapper<ShortLinkDo> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDo.class).eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl()).eq(ShortLinkDo::getGid, hasShortLinkDo.getGid()).eq(ShortLinkDo::getDelFlag, 0).eq(ShortLinkDo::getEnableStatus, 0);
+            LambdaUpdateWrapper<ShortLinkDo> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDo.class)
+                    .eq(ShortLinkDo::getFullShortUrl, requestParam.getFullShortUrl())
+                    .eq(ShortLinkDo::getGid, hasShortLinkDo.getGid())
+                    .eq(ShortLinkDo::getDelFlag, 0)
+                    .eq(ShortLinkDo::getEnableStatus, 0);
             baseMapper.delete(updateWrapper);
             shortLinkDo.setGid(requestParam.getGid());
             baseMapper.insert(shortLinkDo);
+        }
+        if (!Objects.equals(requestParam.getValidDateType(), hasShortLinkDo.getValidDateType())
+                || !Objects.equals(requestParam.getValidDate(), hasShortLinkDo.getValidDate())) {
+            stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+            if (hasShortLinkDo.getValidDate() != null && hasShortLinkDo.getValidDate().before(new Date())) {
+                if (Objects.equals(requestParam.getValidDateType(), ValidDateTypeEnum.PERMANENT.getType())
+                        || requestParam.getValidDate().after(new Date())) {
+                    stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+                }
+            }
         }
     }
 
