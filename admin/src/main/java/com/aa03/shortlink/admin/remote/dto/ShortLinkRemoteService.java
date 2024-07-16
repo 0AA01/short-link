@@ -35,6 +35,18 @@ public interface ShortLinkRemoteService {
     }
 
     /**
+     * 批量创建短链接
+     *
+     * @param requestParam 批量创建短链接请求参数
+     * @return 批量短链接创建信息
+     */
+    default Result<ShortLinkBatchCreateRespDto> batchCreateShortLink(ShortLinkBatchCreateReqDto requestParam) {
+        String resultBodyStr = HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/create/batch", JSON.toJSONString(requestParam));
+        return JSON.parseObject(resultBodyStr, new TypeReference<>() {
+        });
+    }
+
+    /**
      * 短链接分页查询
      *
      * @param requestParam 短链接分页查询请求参数
@@ -186,27 +198,27 @@ public interface ShortLinkRemoteService {
      * @param requestParam 获取短链接监控访问记录数据入参
      * @return 访问记录监控数据
      */
-   default Result<IPage<ShortLinkStatsAccessRecordRespDto>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam) {
-       Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
-       stringObjectMap.remove("orders");
-       stringObjectMap.remove("records");
-       String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record", stringObjectMap);
-       return JSON.parseObject(resultPageStr, new TypeReference<>() {
-       });
-   }
+    default Result<IPage<ShortLinkStatsAccessRecordRespDto>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam) {
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record", stringObjectMap);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
+    }
 
-   /**
+    /**
      * 访问分组短链接指定时间内访问记录监控数据
      *
      * @param requestParam 获取短链接监控访问记录数据入参
      * @return 访问记录监控数据
      */
-   default Result<IPage<ShortLinkStatsAccessRecordRespDto>> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDto requestParam) {
-       Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
-       stringObjectMap.remove("orders");
-       stringObjectMap.remove("records");
-       String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record/group", stringObjectMap);
-       return JSON.parseObject(resultPageStr, new TypeReference<>() {
-       });
-   }
+    default Result<IPage<ShortLinkStatsAccessRecordRespDto>> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDto requestParam) {
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record/group", stringObjectMap);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {
+        });
+    }
 }

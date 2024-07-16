@@ -13,12 +13,11 @@ import com.aa03.shortlink.project.common.convention.exception.ServiceException;
 import com.aa03.shortlink.project.common.enums.ValidDateTypeEnum;
 import com.aa03.shortlink.project.dao.entity.*;
 import com.aa03.shortlink.project.dao.mapper.*;
+import com.aa03.shortlink.project.dto.req.ShortLinkBatchCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
+import com.aa03.shortlink.project.dto.resp.*;
 import com.aa03.shortlink.project.service.LinkStatsTodayService;
 import com.aa03.shortlink.project.service.ShortLinkService;
 import com.aa03.shortlink.project.toolkit.HashUtil;
@@ -137,6 +136,35 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     }
 
     @Override
+    public ShortLinkBatchCreateRespDto batchCreateShortLink(ShortLinkBatchCreateReqDto requestParam) {
+        List<String> originList = requestParam.getOriginUrls();
+        List<String> describeList = requestParam.getDescribes();
+        List<ShortLinkBaseInfoRespDto> result = new ArrayList<>();
+        for (int i = 0; i < originList.size(); i++) {
+            ShortLinkCreateReqDto shortLinkCreateReqDto = BeanUtil.toBean(requestParam, ShortLinkCreateReqDto.class);
+            String originUrl = originList.get(i);
+            String describe = describeList.get(i);
+            shortLinkCreateReqDto.setOriginUrl(originUrl);
+            shortLinkCreateReqDto.setDescribe(describe);
+            try {
+                ShortLinkCreateRespDto shortLink = createShortLink(shortLinkCreateReqDto);
+                ShortLinkBaseInfoRespDto linkBaseInfoRespDto = ShortLinkBaseInfoRespDto.builder()
+                        .fullShortUrl(shortLink.getFullShortUrl())
+                        .originUrl(shortLink.getOriginUrl())
+                        .describe(describe)
+                        .build();
+                result.add(linkBaseInfoRespDto);
+            } catch (Throwable ex) {
+                log.error("批量创建短链接失败，原始参数：{}", originUrl);
+            }
+        }
+        return ShortLinkBatchCreateRespDto.builder()
+                .baseLinkInfos(result)
+                .total(result.size())
+                .build();
+    }
+
+    @Override
     public IPage<ShortLinkPageRespDto> pageShortLink(ShortLinkPageReqDto requestParam) {
         IPage<ShortLinkDo> resultPage = baseMapper.pageLink(requestParam);
         return resultPage.convert(each -> {
@@ -187,7 +215,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
         String fullShortUrl = serverName + serverPort + "/" + shortUri;
         String originalLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-
 
 
         if (StrUtil.isNotBlank(originalLink)) {

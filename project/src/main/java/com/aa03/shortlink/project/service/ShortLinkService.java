@@ -1,9 +1,11 @@
 package com.aa03.shortlink.project.service;
 
 import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
+import com.aa03.shortlink.project.dto.req.ShortLinkBatchCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
+import com.aa03.shortlink.project.dto.resp.ShortLinkBatchCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
@@ -26,6 +28,14 @@ public interface ShortLinkService extends IService<ShortLinkDo> {
      * @return 短链接创建信息
      */
     ShortLinkCreateRespDto createShortLink(ShortLinkCreateReqDto requestParam);
+
+    /**
+     * 批量创建短链接
+     *
+     * @param requestParam 批量创建短链接请求参数
+     * @return 批量创建短链接返回参数
+     */
+    ShortLinkBatchCreateRespDto batchCreateShortLink(ShortLinkBatchCreateReqDto requestParam);
 
     /**
      * 短链接分页查询
@@ -53,7 +63,7 @@ public interface ShortLinkService extends IService<ShortLinkDo> {
     /**
      * 短链接跳转原始链接
      *
-     * @param shortUri  短链接后缀
+     * @param shortUri 短链接后缀
      * @param request  HTTP请求
      * @param response HTTP响应
      */

@@ -2,9 +2,11 @@ package com.aa03.shortlink.project.controller;
 
 import com.aa03.shortlink.project.common.convention.result.Result;
 import com.aa03.shortlink.project.common.convention.result.Results;
+import com.aa03.shortlink.project.dto.req.ShortLinkBatchCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
+import com.aa03.shortlink.project.dto.resp.ShortLinkBatchCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
 import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
@@ -35,11 +37,19 @@ public class ShortLinkController {
     }
 
     /**
-     * 创建短链接分组
+     * 创建短链接
      */
     @PostMapping("/api/short-link/v1/create")
     public Result<ShortLinkCreateRespDto> createShortLink(@RequestBody ShortLinkCreateReqDto requestParam) {
         return Results.success(shortLinkService.createShortLink(requestParam));
+    }
+
+    /**
+     * 批量创建短链接
+     */
+    @PostMapping("/api/short-link/v1/create/batch")
+    public Result<ShortLinkBatchCreateRespDto> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDto requestParam) {
+        return Results.success(shortLinkService.batchCreateShortLink(requestParam));
     }
 
     /**
