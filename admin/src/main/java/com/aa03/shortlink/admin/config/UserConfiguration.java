@@ -3,6 +3,7 @@ package com.aa03.shortlink.admin.config;
 import com.aa03.shortlink.admin.common.biz.user.UserFlowRiskControlFilter;
 import com.aa03.shortlink.admin.common.biz.user.UserTransmitFilter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,7 @@ public class UserConfiguration {
      * 用户操作流量风控过滤器
      */
     @Bean
+    @ConditionalOnProperty(name = "short-link.flow-limit.enable", havingValue = "true")
     public FilterRegistrationBean<UserFlowRiskControlFilter> globalUserFlowRiskControlFilter(StringRedisTemplate stringRedisTemplate, UserFlowRiskControlConfiguration userFlowRiskControlConfiguration) {
         FilterRegistrationBean<UserFlowRiskControlFilter> registration = new FilterRegistrationBean<>();
         registration.setFilter(new UserFlowRiskControlFilter(stringRedisTemplate, userFlowRiskControlConfiguration));
