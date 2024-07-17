@@ -18,6 +18,14 @@ short-link:
   stats:
     locale:
       amap-key: a446be873b6e7dc45541a898075dab51
+  goto-domain:
+    white-list:
+      enable: true
+      names: '知乎、百度'
+      details:
+        - baidu.com
+        - zhihu.com
+
 
 
 
