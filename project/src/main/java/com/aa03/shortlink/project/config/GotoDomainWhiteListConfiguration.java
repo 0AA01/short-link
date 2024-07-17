@@ -15,7 +15,7 @@ import java.util.List;
 public class GotoDomainWhiteListConfiguration {
 
     /**
-     * 是否开始跳转原始链接白名单验证
+     * 是否开启跳转原始链接白名单验证
      */
     private Boolean enable;
 
