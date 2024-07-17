@@ -1,6 +1,7 @@
 package com.aa03.shortlink.project.service;
 
 import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
+import com.aa03.shortlink.project.dto.biz.ShortLinkStatsRecordDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkBatchCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
@@ -68,4 +69,13 @@ public interface ShortLinkService extends IService<ShortLinkDo> {
      * @param response HTTP响应
      */
     void restoreUrl(String shortUri, ServletRequest request, ServletResponse response);
+
+    /**
+     * 短链接统计
+     *
+     * @param fullShortUrl         完整短链接
+     * @param gid                  分组标识
+     * @param shortLinkStatsRecord 短链接统计实体参数
+     */
+    void shortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDto shortLinkStatsRecord);
 }

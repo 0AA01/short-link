@@ -73,7 +73,7 @@ public class ShortLinkDo extends BaseDo {
     /**
      * 创建类型：0表示接口创建 1表示控制台创建
      */
-    private Integer createType;
+    private Integer createdType;
 
     /**
      * 有效期类型 0：永久有效 1：自定义
@@ -124,4 +124,9 @@ public class ShortLinkDo extends BaseDo {
      */
     @TableField(exist = false)
     private Integer todayUip;
+
+    /**
+     * 删除时间
+     */
+    private Long delTime;
 }
