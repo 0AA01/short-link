@@ -1,6 +1,7 @@
 package com.aa03.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.aa03.shortlink.admin.common.convention.errorcode.BaseErrorCode;
 import com.aa03.shortlink.admin.common.convention.exception.ClientException;
 import com.aa03.shortlink.admin.common.enums.UserErrorCodeEnum;
@@ -110,14 +111,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
             throw new ClientException(USER_NOT_EXIST);
         }
         String key = USER_TOKEN_LOGIN_KEY + requestParam.getUsername();
-        Boolean hasLogin = stringRedisTemplate.hasKey(key);
-        if (Boolean.TRUE.equals(hasLogin)) {
-            throw new ClientException(USER_HAS_LOGIN);
+        Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries(key);
+        if (CollUtil.isNotEmpty(hasLoginMap)) {
+            String token = hasLoginMap.keySet().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElseThrow(() -> new ClientException("用户登录错误"));
+            return new UserLoginRespDto(token);
         }
         String uuid = UUID.randomUUID().toString();
         Map<String, String> userInfoMap = new HashMap<>();
         userInfoMap.put(uuid, JSON.toJSONString(userDo));
         stringRedisTemplate.opsForHash().putAll(key, userInfoMap);
+        //TODO 需要cache改成30分钟、30天前端会有错误
         stringRedisTemplate.expire(key, 30, TimeUnit.DAYS);
         return new UserLoginRespDto(uuid);
     }
