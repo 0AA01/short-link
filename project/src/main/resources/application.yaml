@@ -11,6 +11,11 @@ spring:
     view:
       prefix: /templates/
       suffix: .html
+  data:
+    redis:
+      channel-topic:
+        short-link-stats: 'short_link:stats-stream'
+        short-link-stats-group: 'short_link:stats-stream:only-group'
 
 short-link:
   domain:
@@ -27,7 +32,11 @@ short-link:
         - zhihu.com
 
 
-
+re:
+  mq:
+    - "1721220269138-0"
+    - XADD "short_link:stats-stream" * "New key01313" "New value01313"
+    -
 
 mybatis-plus:
   configuration:
