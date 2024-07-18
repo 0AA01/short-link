@@ -539,7 +539,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             if (customGenerateCount > 10) {
                 throw new ServiceException(SHORT_LINK_GENERATE_FREQUENTLY);
             }
-            originUrl += UUID.randomUUID();
+            originUrl += UUID.randomUUID().toString();
             shortUri = HashUtil.hashToBase62(originUrl);
             String fullShortUrl = createShortLinkDefaultDomain + "/" + shortUri;
             if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
