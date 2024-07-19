@@ -28,62 +28,21 @@ import static com.aa03.shortlink.admin.common.enums.UserErrorCodeEnum.USER_TOKEN
 @RequiredArgsConstructor
 public class UserTransmitFilter implements Filter {
 
-    private final StringRedisTemplate stringRedisTemplate;
-
-    private static final List<String> IGNORE_URI = Lists.newArrayList(
-            "/api/short-link/admin/v1/user/login",
-            "/api/short-link/admin/v1/actual/user/has-username"
-    );
-
     @SneakyThrows
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-        String requestURL = httpServletRequest.getRequestURI();
-        if (!IGNORE_URI.contains(requestURL)) {
-            String method = httpServletRequest.getMethod();
-            if (!(Objects.equals(requestURL, "/api/short-link/admin/v1/user") && Objects.equals(method, "POST"))) {
-                String username = httpServletRequest.getHeader(USER_NAME_KEY);
-                String token = httpServletRequest.getHeader(USER_TOKEN);
-                if (!StrUtil.isAllNotBlank(username, token)) {
-                    returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
-                    return;
-                }
-                String key = USER_TOKEN_LOGIN_KEY + username;
-                Object userInfoJsonStr = null;
-                try {
-                    userInfoJsonStr = stringRedisTemplate.opsForHash().get(key, token);
-                    if (userInfoJsonStr == null) {
-                        returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
-                        return;
-                    }
-                } catch (Exception exception) {
-                    returnJson((HttpServletResponse) servletResponse, JSON.toJSONString(Results.failure(new ClientException(USER_TOKEN_FAIL))));
-                    return;
-                }
-                UserInfoDto userInfoDto = JSON.parseObject(userInfoJsonStr.toString(), UserInfoDto.class);
-                UserContext.setUser(userInfoDto);
-            }
+        String username = httpServletRequest.getHeader("username");
+        if (StrUtil.isNotBlank(username)) {
+            String userId = httpServletRequest.getHeader("userId");
+            String realName = httpServletRequest.getHeader("realName");
+            UserInfoDto userInfoDTO = new UserInfoDto(userId, username, realName);
+            UserContext.setUser(userInfoDTO);
         }
         try {
             filterChain.doFilter(servletRequest, servletResponse);
         } finally {
             UserContext.removeUser();
-        }
-    }
-
-    /*返回客户端数据*/
-    private void returnJson(HttpServletResponse response, String json) throws Exception {
-        PrintWriter writer = null;
-        response.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html; charset=utf-8");
-        try {
-            writer = response.getWriter();
-            writer.print(json);
-        } catch (IOException e) {
-        } finally {
-            if (writer != null)
-                writer.close();
         }
     }
 }
