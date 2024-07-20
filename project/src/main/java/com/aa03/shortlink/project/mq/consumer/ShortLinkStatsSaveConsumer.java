@@ -61,7 +61,7 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
     @Override
     public void onMessage(Map<String, String> producerMap) {
         String keys = producerMap.get("keys");
-        if (!messageQueueIdempotentHandler.isMessageProcessed(keys)) {
+        if (messageQueueIdempotentHandler.isMessageProcessed(keys)) {
             // 判断当前的这个消息流程是否执行完成
             if (messageQueueIdempotentHandler.isAccomplish(keys)) {
                 return;
@@ -91,13 +91,14 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
         RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, fullShortUrl));
         RLock rLock = readWriteLock.readLock();
         rLock.lock();
+        Date now = statsRecord.getCurrentDate();
         try {
             LambdaQueryWrapper<ShortLinkGotoDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDo.class)
                     .eq(ShortLinkGotoDo::getFullShortUrl, fullShortUrl);
             ShortLinkGotoDo shortLinkGotoDo = shortLinkGotoMapper.selectOne(queryWrapper);
             gid = shortLinkGotoDo.getGid();
-            int hour = DateUtil.hour(new Date(), true);
-            Week week = DateUtil.dayOfWeekEnum(new Date());
+            int hour = DateUtil.hour(now, true);
+            Week week = DateUtil.dayOfWeekEnum(now);
             int weekValue = week.getIso8601Value();
             LinkAccessStatsDo linkAccessStatsDo = LinkAccessStatsDo.builder()
                     .pv(1)
@@ -106,7 +107,7 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
                     .hour(hour)
                     .weekday(weekValue)
                     .fullShortUrl(fullShortUrl)
-                    .date(new Date())
+                    .date(now)
                     .build();
             linkAccessStatsMapper.shortLinkStats(linkAccessStatsDo);
             Map<String, Object> localeParamMap = new HashMap<>();
@@ -127,7 +128,7 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
                         .cnt(1)
                         .fullShortUrl(fullShortUrl)
                         .country("中国")
-                        .date(new Date())
+                        .date(now)
                         .build();
                 linkLocaleStatsMapper.shortLinkLocaleState(linkLocaleStatsDo);
             }
@@ -135,28 +136,28 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
                     .os(statsRecord.getOs())
                     .cnt(1)
                     .fullShortUrl(fullShortUrl)
-                    .date(new Date())
+                    .date(now)
                     .build();
             linkOsStatsMapper.shortLinkOsState(linkOsStatsDo);
             LinkBrowserStatsDo linkBrowserStatsDo = LinkBrowserStatsDo.builder()
                     .browser(statsRecord.getBrowser())
                     .cnt(1)
                     .fullShortUrl(fullShortUrl)
-                    .date(new Date())
+                    .date(now)
                     .build();
             linkBrowserStatsMapper.shortLinkBrowserState(linkBrowserStatsDo);
             LinkDeviceStatsDo linkDeviceStatsDo = LinkDeviceStatsDo.builder()
                     .device(statsRecord.getDevice())
                     .cnt(1)
                     .fullShortUrl(fullShortUrl)
-                    .date(new Date())
+                    .date(now)
                     .build();
             linkDeviceStatsMapper.shortLinkDeviceState(linkDeviceStatsDo);
             LinkNetworkStatsDo linkNetworkStatsDo = LinkNetworkStatsDo.builder()
                     .network(statsRecord.getNetwork())
                     .cnt(1)
                     .fullShortUrl(fullShortUrl)
-                    .date(new Date())
+                    .date(now)
                     .build();
             linkNetworkStatsMapper.shortLinkNetworkState(linkNetworkStatsDo);
             LinkAccessLogsDo linkAccessLogsDo = LinkAccessLogsDo.builder()
@@ -176,7 +177,7 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
                     .todayUv(statsRecord.getUvFirstFlag() ? 1 : 0)
                     .todayUip(statsRecord.getUipFirstFlag() ? 1 : 0)
                     .fullShortUrl(fullShortUrl)
-                    .date(new Date())
+                    .date(now)
                     .build();
             linkStatsTodayMapper.shortLinkTodayState(linkStatsTodayDo);
         } catch (Throwable ex) {
