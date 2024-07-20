@@ -18,7 +18,6 @@ import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
 import com.aa03.shortlink.project.dto.resp.*;
-import com.aa03.shortlink.project.mq.producer.DelayShortLinkStatsProducer;
 import com.aa03.shortlink.project.mq.producer.ShortLinkStatsSaveProducer;
 import com.aa03.shortlink.project.service.LinkStatsTodayService;
 import com.aa03.shortlink.project.service.ShortLinkService;
@@ -354,7 +353,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             }
         }
         if (!Objects.equals(requestParam.getValidDateType(), hasShortLinkDo.getValidDateType())
-                || !Objects.equals(requestParam.getValidDate(), hasShortLinkDo.getValidDate())) {
+                || !Objects.equals(requestParam.getValidDate(), hasShortLinkDo.getValidDate())
+                || !Objects.equals(requestParam.getOriginUrl(), hasShortLinkDo.getOriginUrl())) {
             stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
             if (hasShortLinkDo.getValidDate() != null && hasShortLinkDo.getValidDate().before(new Date())) {
                 if (Objects.equals(requestParam.getValidDateType(), ValidDateTypeEnum.PERMANENT.getType())
@@ -496,7 +496,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     }
 
     @Override
-    public void shortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDto statsRecord) {       Map<String, String> producerMap = new HashMap<>();
+    public void shortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDto statsRecord) {
+        Map<String, String> producerMap = new HashMap<>();
         producerMap.put("fullShortUrl", fullShortUrl);
         producerMap.put("gid", gid);
         producerMap.put("statsRecord", JSON.toJSONString(statsRecord));
