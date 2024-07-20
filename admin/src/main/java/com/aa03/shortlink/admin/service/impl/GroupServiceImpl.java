@@ -2,12 +2,16 @@ package com.aa03.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.aa03.shortlink.admin.common.biz.user.UserContext;
 import com.aa03.shortlink.admin.common.convention.exception.ClientException;
+import com.aa03.shortlink.admin.common.convention.exception.ServiceException;
 import com.aa03.shortlink.admin.common.convention.result.Result;
 import com.aa03.shortlink.admin.common.database.BaseDo;
 import com.aa03.shortlink.admin.dao.entity.GroupDo;
+import com.aa03.shortlink.admin.dao.entity.GroupUniqueDo;
 import com.aa03.shortlink.admin.dao.mapper.GroupMapper;
+import com.aa03.shortlink.admin.dao.mapper.GroupUniqueMapper;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupSortReqDto;
 import com.aa03.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDto;
 import com.aa03.shortlink.admin.dto.resp.ShortLinkGroupRespDto;
@@ -21,9 +25,11 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,6 +47,8 @@ import static com.aa03.shortlink.admin.common.constant.RedisCacheConstant.LOCK_G
 @RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDo> implements GroupService {
 
+    private final RBloomFilter<String> gidRegisterCachePenetrationBloomFilter;
+    private final GroupUniqueMapper groupUniqueMapper;
     private final RedissonClient redissonClient;
     private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
@@ -64,18 +72,27 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDo> implemen
             if (CollUtil.isNotEmpty(groupDoList) && groupDoList.size() == groupMaxNum) {
                 throw new ClientException(String.format("创建分组最多:%d个", groupMaxNum));
             }
-            String gid = RandomGenerator.generateRandomString();
-            while (true) {
-                if (!hasGid(username, gid)) break;
-                gid = RandomGenerator.generateRandomString();
+            int retryCount = 0;
+            int maxRetries = 10;
+            String gid = null;
+            while (retryCount < maxRetries) {
+                gid = saveGroupUniqueReturnGid();
+                if (StrUtil.isNotEmpty(gid)) {
+                    GroupDo groupDO = GroupDo.builder()
+                            .gid(gid)
+                            .sortOrder(0)
+                            .username(username)
+                            .name(groupName)
+                            .build();
+                    baseMapper.insert(groupDO);
+                    gidRegisterCachePenetrationBloomFilter.add(gid);
+                    break;
+                }
+                retryCount++;
             }
-            GroupDo groupDo = GroupDo.builder()
-                    .gid(gid)
-                    .name(groupName)
-                    .username(username)
-                    .sortOrder(0)
-                    .build();
-            baseMapper.insert(groupDo);
+            if (StrUtil.isEmpty(gid)) {
+                throw new ServiceException("生成分组标识频繁");
+            }
         } finally {
             lock.unlock();
         }
@@ -138,11 +155,18 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDo> implemen
         });
     }
 
-    private boolean hasGid(String username, String gid) {
-        LambdaQueryWrapper<GroupDo> queryWrapper = Wrappers.lambdaQuery(GroupDo.class)
-                .eq(GroupDo::getGid, gid)
-                .eq(GroupDo::getUsername, Optional.ofNullable(username).orElse(UserContext.getUsername()));
-        GroupDo groupDo = baseMapper.selectOne(queryWrapper);
-        return groupDo != null;
+    private String saveGroupUniqueReturnGid() {
+        String gid = RandomGenerator.generateRandomString();
+        if (!gidRegisterCachePenetrationBloomFilter.contains(gid)) {
+            GroupUniqueDo groupUniqueDO = GroupUniqueDo.builder()
+                    .gid(gid)
+                    .build();
+            try {
+                groupUniqueMapper.insert(groupUniqueDO);
+            } catch (DuplicateKeyException e) {
+                return null;
+            }
+        }
+        return gid;
     }
 }

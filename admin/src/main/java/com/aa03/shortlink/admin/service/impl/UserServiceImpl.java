@@ -28,6 +28,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,6 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
         return userRegisterCachePenetrationBloomFilter.contains(username);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void registerUser(UserRegisterReqDto requestParam) {
         if (hasUsername(requestParam.getUsername())) {

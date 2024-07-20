@@ -9,7 +9,7 @@ CREATE TABLE `t_group_0`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_1`
@@ -23,7 +23,7 @@ CREATE TABLE `t_group_1`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_10`
@@ -37,7 +37,7 @@ CREATE TABLE `t_group_10`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_11`
@@ -51,7 +51,7 @@ CREATE TABLE `t_group_11`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_12`
@@ -65,7 +65,7 @@ CREATE TABLE `t_group_12`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_13`
@@ -79,7 +79,7 @@ CREATE TABLE `t_group_13`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_14`
@@ -93,7 +93,7 @@ CREATE TABLE `t_group_14`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_15`
@@ -107,7 +107,7 @@ CREATE TABLE `t_group_15`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_2`
@@ -121,7 +121,7 @@ CREATE TABLE `t_group_2`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_3`
@@ -135,7 +135,7 @@ CREATE TABLE `t_group_3`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_4`
@@ -149,7 +149,7 @@ CREATE TABLE `t_group_4`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_5`
@@ -163,7 +163,7 @@ CREATE TABLE `t_group_5`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_6`
@@ -177,7 +177,7 @@ CREATE TABLE `t_group_6`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_7`
@@ -191,7 +191,7 @@ CREATE TABLE `t_group_7`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_8`
@@ -205,7 +205,7 @@ CREATE TABLE `t_group_8`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_group_9`
@@ -219,7 +219,15 @@ CREATE TABLE `t_group_9`
     `update_time` datetime     DEFAULT NULL COMMENT '修改时间',
     `del_flag`    tinyint(1) DEFAULT NULL COMMENT '删除标识 0：未删除 1：已删除',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_unique_username_gid` (`gid`,`username`) USING BTREE
+    KEY           `idx_username` (`username`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_group_unique`
+(
+    `id`  bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid` varchar(32) DEFAULT NULL COMMENT '分组标识',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_unique_gid` (`gid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `t_link_0`
@@ -701,6 +709,7 @@ CREATE TABLE `t_link_device_stats`
     UNIQUE KEY `idx_unique_browser_stats` (`full_short_url`,`date`,`device`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+
 CREATE TABLE `t_link_goto_0`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -709,6 +718,7 @@ CREATE TABLE `t_link_goto_0`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_1`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -717,70 +727,7 @@ CREATE TABLE `t_link_goto_1`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_2`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_3`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_4`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_5`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_6`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_7`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_8`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-CREATE TABLE `t_link_goto_9`
-(
-    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
-    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
-    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_10`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -789,6 +736,7 @@ CREATE TABLE `t_link_goto_10`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_11`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -797,6 +745,7 @@ CREATE TABLE `t_link_goto_11`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_12`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -805,6 +754,7 @@ CREATE TABLE `t_link_goto_12`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_13`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -813,6 +763,7 @@ CREATE TABLE `t_link_goto_13`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_14`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
@@ -821,7 +772,80 @@ CREATE TABLE `t_link_goto_14`
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `t_link_goto_15`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_2`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_3`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_4`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_5`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_6`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_7`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_8`
+(
+    `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',
+    `full_short_url` varchar(128) DEFAULT NULL COMMENT '完整短链接',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `idx_full_short_url` (`full_short_url`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `t_link_goto_9`
 (
     `id`             bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
     `gid`            varchar(32)  DEFAULT 'default' COMMENT '分组标识',

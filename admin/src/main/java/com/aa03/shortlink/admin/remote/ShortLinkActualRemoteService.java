@@ -1,5 +1,6 @@
 package com.aa03.shortlink.admin.remote;
 
+import com.aa03.shortlink.admin.config.OpenFeignConfiguration;
 import com.aa03.shortlink.admin.remote.dto.req.*;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.aa03.shortlink.admin.common.convention.result.Result;
@@ -23,7 +24,12 @@ import java.util.List;
  * 短链接中台远程调用服务
  */
 //@FeignClient("aa03-short-link-project")
-@FeignClient(value = "aa03-short-link-project", url = "${aggregation.remote-url:}")
+//@FeignClient(value = "aa03-short-link-project", url = "${aggregation.remote-url:}")
+@FeignClient(
+        value = "short-link-project",
+        url = "${aggregation.remote-url:}",
+        configuration = OpenFeignConfiguration.class
+)
 public interface ShortLinkActualRemoteService {
 
     /**

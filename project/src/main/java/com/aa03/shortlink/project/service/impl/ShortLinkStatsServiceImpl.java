@@ -4,6 +4,8 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
+import com.aa03.shortlink.project.common.biz.user.UserContext;
+import com.aa03.shortlink.project.common.convention.exception.ServiceException;
 import com.aa03.shortlink.project.dao.entity.*;
 import com.aa03.shortlink.project.dao.mapper.*;
 import com.aa03.shortlink.project.dto.req.ShortLinkGroupStatsAccessRecordReqDto;
@@ -15,6 +17,7 @@ import com.aa03.shortlink.project.service.ShortLinkStatsService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
+    private final LinkGroupMapper linkGroupMapper;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
     private final LinkAccessLogsMapper linkAccessLogsMapper;
@@ -35,6 +39,7 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public ShortLinkStatsRespDto oneShortLinkStats(ShortLinkStatsReqDto requestParam) {
+        checkGroupBelongToUser(requestParam.getGid());
         List<LinkAccessStatsDo> listStatsByShortLink = linkAccessStatsMapper.listStatsByShortLink(requestParam);
         if (CollUtil.isEmpty(listStatsByShortLink)) {
             return null;
@@ -232,6 +237,7 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public ShortLinkStatsRespDto groupShortLinkStats(ShortLinkGroupStatsReqDto requestParam) {
+        checkGroupBelongToUser(requestParam.getGid());
         List<LinkAccessStatsDo> listStatsByGroup = linkAccessStatsMapper.listStatsByGroup(requestParam);
         if (CollUtil.isEmpty(listStatsByGroup)) {
             return null;
@@ -395,12 +401,16 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public IPage<ShortLinkStatsAccessRecordRespDto> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam) {
+        checkGroupBelongToUser(requestParam.getGid());
         LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
                 .eq(LinkAccessLogsDo::getFullShortUrl, requestParam.getFullShortUrl())
                 .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
                 .eq(LinkAccessLogsDo::getDelFlag, 0)
                 .orderByDesc(LinkAccessLogsDo::getCreateTime);
         IPage<LinkAccessLogsDo> linkAccessLogsDoIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
+        if (CollUtil.isEmpty(linkAccessLogsDoIPage.getRecords())) {
+            return new Page<>();
+        }
         IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDoIPage.convert(
                 each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class)
         );
@@ -427,7 +437,11 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public IPage<ShortLinkStatsAccessRecordRespDto> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDto requestParam) {
+        checkGroupBelongToUser(requestParam.getGid());
         IPage<LinkAccessLogsDo> linkAccessLogsDOIPage = linkAccessLogsMapper.selectGroupPage(requestParam);
+        if (CollUtil.isEmpty(linkAccessLogsDOIPage.getRecords())) {
+            return new Page<>();
+        }
         IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDOIPage
                 .convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class));
         List<String> userAccessLogsList = actualResult.getRecords().stream()
@@ -449,5 +463,17 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
             each.setUvType(uvType);
         });
         return actualResult;
+    }
+
+    public void checkGroupBelongToUser(String gid) throws ServiceException {
+        String username = Optional.ofNullable(UserContext.getUsername())
+                .orElseThrow(() -> new ServiceException("用户未登录"));
+        LambdaQueryWrapper<GroupDo> queryWrapper = Wrappers.lambdaQuery(GroupDo.class)
+                .eq(GroupDo::getGid, gid)
+                .eq(GroupDo::getUsername, username);
+        List<GroupDo> groupDOList = linkGroupMapper.selectList(queryWrapper);
+        if (CollUtil.isEmpty(groupDOList)) {
+            throw new ServiceException("用户信息与分组标识不匹配");
+        }
     }
 }
