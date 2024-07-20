@@ -95,6 +95,7 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
             }
         } catch (Throwable ex) {
             log.error("记录短链接监控消费异常", ex);
+            messageQueueIdempotentHandler.delMessageProcessed(keys);
             throw ex;
         }
         messageQueueIdempotentHandler.setAccomplish(keys);
