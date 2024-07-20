@@ -4,30 +4,13 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.aa03.shortlink.project.common.convention.exception.ServiceException;
-import com.aa03.shortlink.project.dao.entity.LinkAccessLogsDo;
-import com.aa03.shortlink.project.dao.entity.LinkAccessStatsDo;
-import com.aa03.shortlink.project.dao.entity.LinkBrowserStatsDo;
-import com.aa03.shortlink.project.dao.entity.LinkDeviceStatsDo;
-import com.aa03.shortlink.project.dao.entity.LinkLocaleStatsDo;
-import com.aa03.shortlink.project.dao.entity.LinkNetworkStatsDo;
-import com.aa03.shortlink.project.dao.entity.LinkOsStatsDo;
-import com.aa03.shortlink.project.dao.entity.LinkStatsTodayDo;
-import com.aa03.shortlink.project.dao.entity.ShortLinkGotoDo;
-import com.aa03.shortlink.project.dao.mapper.LinkAccessLogsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkAccessStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkBrowserStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkDeviceStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkLocaleStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkNetworkStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkOsStatsMapper;
-import com.aa03.shortlink.project.dao.mapper.LinkStatsTodayMapper;
-import com.aa03.shortlink.project.dao.mapper.ShortLinkGotoMapper;
-import com.aa03.shortlink.project.dao.mapper.ShortLinkMapper;
+import com.aa03.shortlink.project.dao.entity.*;
+import com.aa03.shortlink.project.dao.mapper.*;
 import com.aa03.shortlink.project.dto.biz.ShortLinkStatsRecordDto;
 import com.aa03.shortlink.project.mq.idempotent.MessageQueueIdempotentHandler;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +26,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.LOCK_GID_UPDATE_KEY;
 import static com.aa03.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
@@ -106,17 +88,14 @@ public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, 
     }
 
     public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDto statsRecord) {
-        fullShortUrl = Optional.ofNullable(fullShortUrl).orElse(statsRecord.getFullShortUrl());
         RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, fullShortUrl));
         RLock rLock = readWriteLock.readLock();
         rLock.lock();
         try {
-            if (StrUtil.isBlank(gid)) {
-                LambdaQueryWrapper<ShortLinkGotoDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDo.class)
-                        .eq(ShortLinkGotoDo::getFullShortUrl, fullShortUrl);
-                ShortLinkGotoDo shortLinkGotoDo = shortLinkGotoMapper.selectOne(queryWrapper);
-                gid = shortLinkGotoDo.getGid();
-            }
+            LambdaQueryWrapper<ShortLinkGotoDo> queryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDo.class)
+                    .eq(ShortLinkGotoDo::getFullShortUrl, fullShortUrl);
+            ShortLinkGotoDo shortLinkGotoDo = shortLinkGotoMapper.selectOne(queryWrapper);
+            gid = shortLinkGotoDo.getGid();
             int hour = DateUtil.hour(new Date(), true);
             Week week = DateUtil.dayOfWeekEnum(new Date());
             int weekValue = week.getIso8601Value();

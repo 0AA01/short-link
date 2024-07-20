@@ -121,9 +121,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .gid(requestParam.getGid())
                 .build();
         try {
-            // 短链接项目有多少数据？如何解决海量数据存储？详情查看：https://aa03.com/shortlink/question
             baseMapper.insert(shortLinkDo);
-            // 短链接数据库分片键是如何考虑的？详情查看：https://aa03.com/shortlink/question
             shortLinkGotoMapper.insert(linkGotoDo);
         } catch (DuplicateKeyException ex) {
             // 首先判断是否存在布隆过滤器，如果不存在直接新增
@@ -132,13 +130,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             }
             throw new ServiceException(String.format("短链接：%s 生成重复", fullShortUrl));
         }
-        // 项目中短链接缓存预热是怎么做的？详情查看：https://aa03.com/shortlink/question
         stringRedisTemplate.opsForValue().set(
                 String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
                 requestParam.getOriginUrl(),
                 LinkUtil.getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS
         );
-        // 删除短链接后，布隆过滤器如何删除？详情查看：https://aa03.com/shortlink/question
         shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
         return ShortLinkCreateRespDto.builder()
                 .fullShortUrl("http://" + shortLinkDo.getFullShortUrl())
@@ -206,7 +202,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .build();
             baseMapper.update(shortLinkDo, updateWrapper);
         } else {
-            // 为什么监控表要加上Gid？不加的话是否就不存在读写锁？详情查看：https://aa03.com/shortlink/question
             RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, requestParam.getFullShortUrl()));
             RLock rLock = readWriteLock.writeLock();
             rLock.lock();
@@ -289,8 +284,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @SneakyThrows
     @Override
     public void restoreUrl(String shortUri, ServletRequest request, ServletResponse response) {
-        // 短链接接口的并发量有多少？如何测试？详情查看：https://aa03.com/shortlink/question
-        // 面试中如何回答短链接是如何跳转长链接？详情查看：https://aa03.com/shortlink/question
         String serverName = request.getServerName();
         String serverPort = Optional.of(request.getServerPort())
                 .filter(each -> !Objects.equals(each, 80))
@@ -350,7 +343,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     LinkUtil.getLinkCacheValidDate(shortLinkDo.getValidDate()), TimeUnit.MILLISECONDS
             );
             ShortLinkStatsRecordDto statsRecord = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
-            shortLinkStats(fullShortUrl, shortLinkDo.getGid(), statsRecord);
+            shortLinkStats(fullShortUrl, null, statsRecord);
             ((HttpServletResponse) response).sendRedirect(shortLinkDo.getOriginUrl());
         } finally {
             lock.unlock();
@@ -409,7 +402,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         producerMap.put("fullShortUrl", fullShortUrl);
         producerMap.put("gid", gid);
         producerMap.put("statsRecord", JSON.toJSONString(statsRecord));
-        // 消息队列为什么选用RocketMQ？详情查看：https://aa03.com/shortlink/question
         shortLinkStatsSaveProducer.send(producerMap);
     }
 
