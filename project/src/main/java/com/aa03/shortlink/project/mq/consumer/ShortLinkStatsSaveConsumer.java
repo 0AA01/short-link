@@ -4,29 +4,46 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.Week;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import com.aa03.shortlink.project.common.convention.exception.ServiceException;
-import com.aa03.shortlink.project.dao.entity.*;
-import com.aa03.shortlink.project.dao.mapper.*;
-import com.aa03.shortlink.project.dto.biz.ShortLinkStatsRecordDto;
-import com.aa03.shortlink.project.mq.idempotent.MessageQueueIdempotentHandler;
-import com.aa03.shortlink.project.mq.producer.DelayShortLinkStatsProducer;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.aa03.shortlink.project.common.convention.exception.ServiceException;
+import com.aa03.shortlink.project.dao.entity.LinkAccessLogsDo;
+import com.aa03.shortlink.project.dao.entity.LinkAccessStatsDo;
+import com.aa03.shortlink.project.dao.entity.LinkBrowserStatsDo;
+import com.aa03.shortlink.project.dao.entity.LinkDeviceStatsDo;
+import com.aa03.shortlink.project.dao.entity.LinkLocaleStatsDo;
+import com.aa03.shortlink.project.dao.entity.LinkNetworkStatsDo;
+import com.aa03.shortlink.project.dao.entity.LinkOsStatsDo;
+import com.aa03.shortlink.project.dao.entity.LinkStatsTodayDo;
+import com.aa03.shortlink.project.dao.entity.ShortLinkGotoDo;
+import com.aa03.shortlink.project.dao.mapper.LinkAccessLogsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkAccessStatsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkBrowserStatsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkDeviceStatsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkLocaleStatsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkNetworkStatsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkOsStatsMapper;
+import com.aa03.shortlink.project.dao.mapper.LinkStatsTodayMapper;
+import com.aa03.shortlink.project.dao.mapper.ShortLinkGotoMapper;
+import com.aa03.shortlink.project.dao.mapper.ShortLinkMapper;
+import com.aa03.shortlink.project.dto.biz.ShortLinkStatsRecordDto;
+import com.aa03.shortlink.project.mq.idempotent.MessageQueueIdempotentHandler;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
+import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.stream.MapRecord;
-import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.stream.StreamListener;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.aa03.shortlink.project.common.constant.RedisKeyConstant.LOCK_GID_UPDATE_KEY;
 import static com.aa03.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
@@ -37,7 +54,11 @@ import static com.aa03.shortlink.project.common.constant.ShortLinkConstant.AMAP_
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRecord<String, String, String>> {
+@RocketMQMessageListener(
+        topic = "${rocketmq.producer.topic}",
+        consumerGroup = "${rocketmq.consumer.group}"
+)
+public class ShortLinkStatsSaveConsumer implements RocketMQListener<Map<String, String>> {
 
     private final ShortLinkMapper shortLinkMapper;
     private final ShortLinkGotoMapper shortLinkGotoMapper;
@@ -50,37 +71,33 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
     private final LinkStatsTodayMapper linkStatsTodayMapper;
-    private final StringRedisTemplate stringRedisTemplate;
     private final MessageQueueIdempotentHandler messageQueueIdempotentHandler;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocaleAmapKey;
 
     @Override
-    public void onMessage(MapRecord<String, String, String> message) {
-        String stream = message.getStream();
-        RecordId id = message.getId();
-        if (!messageQueueIdempotentHandler.isMessageProcessed(id.toString())) {
-            if (messageQueueIdempotentHandler.isAccomplish(id.toString())) {
+    public void onMessage(Map<String, String> producerMap) {
+        String keys = producerMap.get("keys");
+        if (!messageQueueIdempotentHandler.isMessageProcessed(keys)) {
+            // 判断当前的这个消息流程是否执行完成
+            if (messageQueueIdempotentHandler.isAccomplish(keys)) {
                 return;
             }
             throw new ServiceException("消息未完成流程，需要消息队列重试");
         }
         try {
-            Map<String, String> producerMap = message.getValue();
             String fullShortUrl = producerMap.get("fullShortUrl");
             if (StrUtil.isNotBlank(fullShortUrl)) {
                 String gid = producerMap.get("gid");
                 ShortLinkStatsRecordDto statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDto.class);
                 actualSaveShortLinkStats(fullShortUrl, gid, statsRecord);
             }
-            stringRedisTemplate.opsForStream().delete(Objects.requireNonNull(stream), id.getValue());
         } catch (Throwable ex) {
-            messageQueueIdempotentHandler.delMessageProcessed(id.toString());
             log.error("记录短链接监控消费异常", ex);
             throw ex;
         }
-        messageQueueIdempotentHandler.setAccomplish(id.toString());
+        messageQueueIdempotentHandler.setAccomplish(keys);
     }
 
     public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDto statsRecord) {

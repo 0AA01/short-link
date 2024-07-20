@@ -57,3 +57,14 @@ framework:
   cache:
     redis:
       prefix: aa03
+
+rocketmq:
+  name-server: common-rocketmq-dev.magestack.cn:9876
+  producer:
+    group: aa03-short-link_project-service_stats-save_pg
+    topic: aa03-short-link_project-service_topic
+    send-message-timeout: 2000
+    retry-times-when-send-failed: 1
+    retry-times-when-send-async-failed: 1
+  consumer:
+    group: aa03-short-link_project-service_stats-save_cg
