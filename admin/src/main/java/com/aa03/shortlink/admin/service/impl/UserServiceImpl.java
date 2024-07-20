@@ -2,6 +2,7 @@ package com.aa03.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import com.aa03.shortlink.admin.common.biz.user.UserContext;
 import com.aa03.shortlink.admin.common.convention.errorcode.BaseErrorCode;
 import com.aa03.shortlink.admin.common.convention.exception.ClientException;
 import com.aa03.shortlink.admin.common.enums.UserErrorCodeEnum;
@@ -24,11 +25,13 @@ import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -75,18 +78,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
             throw new ClientException(USER_NAME_EXIST);
         }
         RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
-        try {
-            if (lock.tryLock()) {
-                UserDo userDo = BeanUtil.toBean(requestParam, UserDo.class);
-                int inserted = baseMapper.insert(userDo);
-                if (inserted < 0) {
-                    throw new ClientException(BaseErrorCode.CLIENT_ERROR);
-                }
-                groupService.saveGroup(requestParam.getUsername(), "默认分组");
-                userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
-                return;
-            }
+        if (!lock.tryLock()) {
             throw new ClientException(USER_NAME_EXIST);
+        }
+        try {
+            UserDo userDo = BeanUtil.toBean(requestParam, UserDo.class);
+            int inserted = baseMapper.insert(userDo);
+            if (inserted < 0) {
+                throw new ClientException(BaseErrorCode.CLIENT_ERROR);
+            }
+            groupService.saveGroup(requestParam.getUsername(), "默认分组");
+            userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
+        } catch (DuplicateKeyException ex) {
+            throw new ClientException(USER_EXIST);
         } finally {
             lock.unlock();
         }
@@ -94,6 +98,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDo> implements 
 
     @Override
     public void updateUser(UserUpdateReqDto userUpdateReqDto) {
+        if (!Objects.equals(userUpdateReqDto.getUsername(), UserContext.getUsername())) {
+            throw new ClientException("当前登录用户修改请求异常");
+        }
         LambdaUpdateWrapper<UserDo> queryWrapper = Wrappers.lambdaUpdate(UserDo.class)
                 .eq(UserDo::getUsername, userUpdateReqDto.getUsername());
         UserDo userDo = BeanUtil.toBean(userUpdateReqDto, UserDo.class);
