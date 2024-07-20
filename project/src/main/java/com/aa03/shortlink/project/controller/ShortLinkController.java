@@ -6,10 +6,7 @@ import com.aa03.shortlink.project.dto.req.ShortLinkBatchCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkBatchCreateRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
+import com.aa03.shortlink.project.dto.resp.*;
 import com.aa03.shortlink.project.handler.CustomBlockHandler;
 import com.aa03.shortlink.project.service.ShortLinkService;
 import com.alibaba.csp.sentinel.annotation.SentinelResource;
@@ -80,7 +77,7 @@ public class ShortLinkController {
      * 查询短链接分组内数量
      */
     @GetMapping("/api/short-link/v1/count")
-    public Result<List<ShortLinkCountQueryRespDto>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParam) {
+    public Result<List<ShortLinkGroupCountQueryRespDto>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParam) {
         return Results.success(shortLinkService.listGroupShortLinkCount(requestParam));
     }
 }

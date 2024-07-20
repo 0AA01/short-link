@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
-import com.aa03.shortlink.project.config.GotoDomainWhiteListConfiguration;
 import com.aa03.shortlink.project.dao.entity.*;
 import com.aa03.shortlink.project.dao.mapper.*;
 import com.aa03.shortlink.project.dto.req.ShortLinkGroupStatsAccessRecordReqDto;
@@ -397,7 +396,6 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
     @Override
     public IPage<ShortLinkStatsAccessRecordRespDto> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDto requestParam) {
         LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
-                .eq(LinkAccessLogsDo::getGid, requestParam.getGid())
                 .eq(LinkAccessLogsDo::getFullShortUrl, requestParam.getFullShortUrl())
                 .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
                 .eq(LinkAccessLogsDo::getDelFlag, 0)
@@ -410,6 +408,7 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
         List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectUvTypeByUsers(
                 requestParam.getGid(),
                 requestParam.getFullShortUrl(),
+                requestParam.getEnableStatus(),
                 requestParam.getStartDate(),
                 requestParam.getEndDate(),
                 userAccessLogsList
@@ -428,13 +427,9 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public IPage<ShortLinkStatsAccessRecordRespDto> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDto requestParam) {
-        LambdaQueryWrapper<LinkAccessLogsDo> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDo.class)
-                .eq(LinkAccessLogsDo::getGid, requestParam.getGid())
-                .between(LinkAccessLogsDo::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
-                .eq(LinkAccessLogsDo::getDelFlag, 0)
-                .orderByDesc(LinkAccessLogsDo::getCreateTime);
-        IPage<LinkAccessLogsDo> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
-        IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class));
+        IPage<LinkAccessLogsDo> linkAccessLogsDOIPage = linkAccessLogsMapper.selectGroupPage(requestParam);
+        IPage<ShortLinkStatsAccessRecordRespDto> actualResult = linkAccessLogsDOIPage
+                .convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDto.class));
         List<String> userAccessLogsList = actualResult.getRecords().stream()
                 .map(ShortLinkStatsAccessRecordRespDto::getUser)
                 .toList();

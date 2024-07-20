@@ -1,40 +1,34 @@
 package com.aa03.shortlink.project.dao.mapper;
 
 import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
-import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.aa03.shortlink.project.dao.entity.ShortLinkDo;
+import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
+import com.aa03.shortlink.project.dto.req.ShortLinkRecycleBinPageReqDto;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Update;
 
 /**
- * 短链接持久化层
+ * 短链接持久层
  */
 public interface ShortLinkMapper extends BaseMapper<ShortLinkDo> {
 
     /**
      * 短链接访问统计自增
      */
-    @Update(
-            "update t_link set " +
-                    "total_pv = total_pv + #{totalPv}, " +
-                    "total_uv = total_uv + #{totalUv}, " +
-                    "total_uip = total_uip + #{totalUip} " +
-                    "where " +
-                    "gid = #{gid} and " +
-                    "full_short_url = #{fullShortUrl};"
-    )
-    void incrementState(
-            @Param("gid") String gid,
-            @Param("fullShortUrl") String fullShortUrl,
-            @Param("totalPv") Integer totalPv,
-            @Param("totalUv") Integer totalUv,
-            @Param("totalUip") Integer totalUip
-    );
+    void incrementStats(@Param("gid") String gid,
+                        @Param("fullShortUrl") String fullShortUrl,
+                        @Param("totalPv") Integer totalPv,
+                        @Param("totalUv") Integer totalUv,
+                        @Param("totalUip") Integer totalUip);
 
     /**
-     * 短链接分页查询
+     * 分页统计短链接
      */
     IPage<ShortLinkDo> pageLink(ShortLinkPageReqDto requestParam);
+
+    /**
+     * 分页统计回收站短链接
+     */
+    IPage<ShortLinkDo> pageRecycleBinLink(ShortLinkRecycleBinPageReqDto requestParam);
 }

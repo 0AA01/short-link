@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 @SpringBootApplication
-//@EnableDiscoveryClient
+@EnableDiscoveryClient
 @MapperScan("com.aa03.shortlink.project.dao.mapper")
 public class ShortLinkApplication {
     public static void main(String[] args) {

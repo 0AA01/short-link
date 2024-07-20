@@ -29,4 +29,9 @@ public class ShortLinkStatsAccessRecordReqDto extends Page<LinkAccessLogsDo> {
      * 结束日期
      */
     private String endDate;
+
+    /**
+     * 启用标识 0：启用 1：未启用
+     */
+    private Integer enableStatus;
 }

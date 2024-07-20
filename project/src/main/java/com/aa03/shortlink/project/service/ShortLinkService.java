@@ -6,10 +6,7 @@ import com.aa03.shortlink.project.dto.req.ShortLinkBatchCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkCreateReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkPageReqDto;
 import com.aa03.shortlink.project.dto.req.ShortLinkUpdateReqDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkBatchCreateRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkCountQueryRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkCreateRespDto;
-import com.aa03.shortlink.project.dto.resp.ShortLinkPageRespDto;
+import com.aa03.shortlink.project.dto.resp.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.ServletRequest;
@@ -52,7 +49,7 @@ public interface ShortLinkService extends IService<ShortLinkDo> {
      * @param requestParam 查询短链接分组内数量请求参数
      * @return 查询短链接分组内数量响应
      */
-    List<ShortLinkCountQueryRespDto> listGroupShortLinkCount(List<String> requestParam);
+    List<ShortLinkGroupCountQueryRespDto> listGroupShortLinkCount(List<String> requestParam);
 
     /**
      * 短链接信息修改

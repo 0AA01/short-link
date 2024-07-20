@@ -16,11 +16,11 @@ import java.util.List;
 public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDo> {
 
     /**
-     * 记录访问短链接地区数据
+     * 记录地区访问监控数据
      */
     @Insert("INSERT INTO " +
-            "t_link_locale_stats (full_short_url, gid, date, cnt, country, province, city, adcode, create_time, update_time, del_flag) " +
-            "VALUES( #{linkLocaleStats.fullShortUrl},  #{linkLocaleStats.gid}, #{linkLocaleStats.date}, #{linkLocaleStats.cnt}, #{linkLocaleStats.country}, #{linkLocaleStats.province}, #{linkLocaleStats.city}, #{linkLocaleStats.adcode}, NOW(), NOW(), 0) " +
+            "t_link_locale_stats (full_short_url, date, cnt, country, province, city, adcode, create_time, update_time, del_flag) " +
+            "VALUES( #{linkLocaleStats.fullShortUrl}, #{linkLocaleStats.date}, #{linkLocaleStats.cnt}, #{linkLocaleStats.country}, #{linkLocaleStats.province}, #{linkLocaleStats.city}, #{linkLocaleStats.adcode}, NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY UPDATE cnt = cnt +  #{linkLocaleStats.cnt};")
     void shortLinkLocaleState(@Param("linkLocaleStats") LinkLocaleStatsDo linkLocaleStatsDo);
 
@@ -28,31 +28,36 @@ public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDo> {
      * 根据短链接获取指定日期内地区监控数据
      */
     @Select("SELECT " +
-            "    province, " +
-            "    SUM(cnt) AS cnt " +
+            "    tlls.province, " +
+            "    SUM(tlls.cnt) AS cnt " +
             "FROM " +
-            "    t_link_locale_stats " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_locale_stats tlls ON tl.full_short_url = tlls.full_short_url " +
             "WHERE " +
-            "    full_short_url = #{param.fullShortUrl} " +
-            "    AND gid = #{param.gid} " +
-            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "    tlls.full_short_url = #{param.fullShortUrl} " +
+            "    AND tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = #{param.enableStatus} " +
+            "    AND tlls.date BETWEEN #{param.startDate} and #{param.endDate} " +
             "GROUP BY " +
-            "    full_short_url, gid, province;")
+            "    tlls.full_short_url, tl.gid, tlls.province;")
     List<LinkLocaleStatsDo> listLocaleByShortLink(@Param("param") ShortLinkStatsReqDto requestParam);
 
     /**
      * 根据分组获取指定日期内地区监控数据
      */
     @Select("SELECT " +
-            "    province, " +
-            "    SUM(cnt) AS cnt " +
+            "    tlls.province, " +
+            "    SUM(tlls.cnt) AS cnt " +
             "FROM " +
-            "    t_link_locale_stats " +
+            "    t_link tl INNER JOIN " +
+            "    t_link_locale_stats tlls ON tl.full_short_url = tlls.full_short_url " +
             "WHERE " +
-            "    gid = #{param.gid} " +
-            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "    tl.gid = #{param.gid} " +
+            "    AND tl.del_flag = '0' " +
+            "    AND tl.enable_status = '0' " +
+            "    AND tlls.date BETWEEN #{param.startDate} and #{param.endDate} " +
             "GROUP BY " +
-            "    gid, province;")
+            "    tl.gid, tlls.province;")
     List<LinkLocaleStatsDo> listLocaleByGroup(@Param("param") ShortLinkGroupStatsReqDto requestParam);
-
 }
