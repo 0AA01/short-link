@@ -1,52 +1,56 @@
 server:
-  port: 8001
+  port: 8003
 
 spring:
   application:
-    name: aa03-short-link-project
+    name: aa03-short-link-aggregation
   datasource:
-    # ShardingSphere 对 Driver 自定义，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    # ShardingSphere 配置文件路径
     url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
   data:
     redis:
       host: common-redis-dev.magestack.cn
       port: 19389
       password: Sm9sVXBOYJjI030b5tz0trjpzvZzRhtZmEbv0uOImcD1wEDOPfeaqNU4PxHob/Wp
-  cloud:
-    nacos:
-      discovery:
-        server-addr: common-nacos-dev.magestack.cn:8848
   mvc:
     view:
       prefix: /templates/
       suffix: .html
+  cloud:
+    nacos:
+      discovery:
+        server-addr: common-nacos-dev.magestack.cn:8848
+
+aggregation:
+  remote-url: http://127.0.0.1:${server.port}
 
 short-link:
+  group:
+    max-num: 20
+  flow-limit:
+    enable: true
+    time-window: 1
+    max-access-count: 20
   domain:
-    default: nurl.ink:8001
+    default: nurl.ink:8003
   stats:
     locale:
-      amap-key: a446be873b6e7dc45541a898075dab51
+      amap-key: 824c511f0997586ea016f979fdb23087
   goto-domain:
     white-list:
       enable: true
-      names: '知乎、百度'
+      names: '??offer,??,??,???'
       details:
-        - baidu.com
+        - nageoffer.com
         - zhihu.com
+        - juejin.cn
+        - cnblogs.com
 
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      logic-delete-field: delFlag
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-      id-type: auto
   mapper-locations: classpath:mapper/*.xml
+
 
 unique-name: aa03
 framework:
